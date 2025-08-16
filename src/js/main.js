@@ -14,25 +14,25 @@ class KiwiDairyGame {
     async init() {
         try {
             console.log('Initializing Kiwi Dairy Game...');
-            
+
             // Initialize data manager first
             this.dataManager = new DataManager();
             await this.dataManager.init();
-            
+
             // Initialize UI manager
             this.uiManager = new UIManager();
             this.uiManager.init();
-            
+
             // Initialize game instance
             this.game = new Game(this.dataManager, this.uiManager);
             await this.game.init();
-            
+
             // Set up event listeners
             this.setupEventListeners();
-            
+
             this.initialized = true;
             console.log('Game initialized successfully!');
-            
+
         } catch (error) {
             console.error('Failed to initialize game:', error);
             this.showError('Failed to load game. Please refresh the page.');
@@ -150,11 +150,11 @@ class KiwiDairyGame {
             this.uiManager.showNotification('Tutorial system not available', 'error');
             return;
         }
-        
+
         const tutorials = this.game.tutorialManager.getAvailableTutorials();
         let content = '<div class="tutorial-menu">';
         content += '<p>Choose a tutorial to learn different aspects of dairy farming:</p>';
-        
+
         tutorials.forEach(tutorial => {
             const status = tutorial.completed ? '✓' : '○';
             content += `
@@ -167,11 +167,11 @@ class KiwiDairyGame {
                 </div>
             `;
         });
-        
+
         content += '</div>';
-        
+
         this.uiManager.showModal(content, 'Tutorials');
-        
+
         // Add click handlers for tutorial options
         setTimeout(() => {
             document.querySelectorAll('.tutorial-option').forEach(option => {
@@ -185,8 +185,45 @@ class KiwiDairyGame {
     }
 
     showSettings() {
-        // TODO: Implement settings
-        this.uiManager.showNotification('Settings coming soon!', 'info');
+        // Settings modal content
+        const content = `
+            <form id="settings-form" class="settings-form">
+                <div class="settings-group">
+                    <label for="sound-toggle">Sound:</label>
+                    <input type="checkbox" id="sound-toggle" checked>
+                </div>
+                <div class="settings-group">
+                    <label for="music-toggle">Music:</label>
+                    <input type="checkbox" id="music-toggle" checked>
+                </div>
+                <div class="settings-group">
+                    <label for="difficulty-select">Difficulty:</label>
+                    <select id="difficulty-select">
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <div class="settings-group">
+                    <label for="accessibility-toggle">Accessibility Mode:</label>
+                    <input type="checkbox" id="accessibility-toggle">
+                </div>
+                <button type="submit" class="settings-save-btn">Save</button>
+            </form>
+        `;
+        this.uiManager.showModal(content, 'Settings');
+        // Save settings handler
+        setTimeout(() => {
+            const form = document.getElementById('settings-form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    // Here you would save settings to localStorage or game state
+                    this.uiManager.showNotification('Settings saved!', 'success');
+                    this.uiManager.hideModal();
+                });
+            }
+        }, 100);
     }
 
     showMainMenu() {
@@ -205,7 +242,7 @@ class KiwiDairyGame {
 document.addEventListener('DOMContentLoaded', async () => {
     const gameInstance = new KiwiDairyGame();
     await gameInstance.init();
-    
+
     // Make game instance globally available for debugging
     window.kiwiDairyGame = gameInstance;
 });

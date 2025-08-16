@@ -94,13 +94,19 @@ export class UIManager {
     }
 
     showScreen(screenId) {
-        // Hide current screen
+        // Hide all screens
         document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
         });
 
-        // Show new screen
-        const screen = document.getElementById(`${screenId}-screen`);
+        // Map logical screen names to actual HTML IDs
+        const screenMap = {
+            'menu': 'menu-screen',
+            'scenario-select': 'scenario-select-screen',
+            'game': 'game-screen'
+        };
+        const htmlId = screenMap[screenId] || screenId;
+        const screen = document.getElementById(htmlId);
         if (screen) {
             screen.classList.add('active');
             this.currentScreen = screenId;
@@ -181,7 +187,7 @@ export class UIManager {
 
         // Default values if system not fully implemented
         const stats = cattleSystem || {};
-        
+
         cattleStats.innerHTML = `
             <div class="stat-item">
                 <span class="stat-label">Total Cows:</span>
@@ -262,11 +268,13 @@ export class UIManager {
     showModal(content, title = '') {
         const overlay = document.getElementById('modal-overlay');
         const modalContent = document.getElementById('modal-content');
-        
+
         modalContent.innerHTML = `
-            ${title ? `<h2>${title}</h2>` : ''}
-            <button class="modal-close">×</button>
-            <div class="modal-body">${content}</div>
+            <div role="dialog" aria-modal="true" aria-label="${title}">
+                ${title ? `<h2>${title}</h2>` : ''}
+                <button class="modal-close" aria-label="Close dialog">×</button>
+                <div class="modal-body">${content}</div>
+            </div>
         `;
 
         // Add close functionality

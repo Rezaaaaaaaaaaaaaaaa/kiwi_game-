@@ -1,6 +1,16 @@
 import { BaseSystem } from './BaseSystem.js';
 
 export class CattleSystem extends BaseSystem {
+    applyDisease(type) {
+        if (type === 'mastitis') {
+            this.cattle.forEach(cow => {
+                if (cow.lactating && Math.random() < 0.2) {
+                    cow.health = Math.max(0, cow.health - 20);
+                }
+            });
+            this.game.uiManager.showNotification('Disease event: Mastitis outbreak!', 'warning');
+        }
+    }
     constructor(game) {
         super(game);
         this.cattle = [];
@@ -59,7 +69,7 @@ export class CattleSystem extends BaseSystem {
         if (!scenario || scenario.startingCattle === 0) return;
 
         const defaultBreed = this.breeds.get('friesian');
-        
+
         for (let i = 0; i < scenario.startingCattle; i++) {
             this.cattle.push(this.createCow(defaultBreed, 'friesian'));
         }
@@ -91,7 +101,7 @@ export class CattleSystem extends BaseSystem {
         if (!pastures.length) return;
 
         let pastureIndex = 0;
-        
+
         this.cattle.forEach(cow => {
             const pasture = pastures[pastureIndex];
             if (pasture.currentStock < pasture.maxStock) {
@@ -110,19 +120,19 @@ export class CattleSystem extends BaseSystem {
 
     update(deltaTime) {
         super.update(deltaTime);
-        
+
         const currentHour = this.game.gameTime.hour;
-        
+
         if (currentHour !== this.lastMilking && (currentHour === 6 || currentHour === 16)) {
             this.milkCows();
             this.lastMilking = currentHour;
         }
-        
+
         if (currentHour !== this.lastFeeding && currentHour === 7) {
             this.feedCattle();
             this.lastFeeding = currentHour;
         }
-        
+
         this.updateCattleHealth();
         this.calculateProduction();
         this.manageBreedingl();
@@ -132,7 +142,7 @@ export class CattleSystem extends BaseSystem {
         let totalMilk = 0;
         const milkingShed = this.game.systems.get('farm')?.buildings?.get('milking-shed');
         const maxCapacity = milkingShed?.capacity || 100;
-        
+
         const milkingCows = this.cattle
             .filter(cow => cow.lactating && cow.health > 50)
             .slice(0, maxCapacity);
@@ -140,26 +150,26 @@ export class CattleSystem extends BaseSystem {
         milkingCows.forEach(cow => {
             if (cow.lactating && cow.daysInMilk < 305) {
                 let milkYield = cow.milkYield;
-                
+
                 milkYield *= (cow.health / 100);
                 milkYield *= this.getLactationCurve(cow.daysInMilk);
-                
+
                 if (cow.feedStatus === 'poor') milkYield *= 0.7;
                 if (cow.feedStatus === 'excellent') milkYield *= 1.1;
-                
+
                 totalMilk += milkYield;
                 cow.daysInMilk++;
-                
+
                 if (cow.daysInMilk >= 305) {
                     cow.lactating = false;
                     cow.daysInMilk = 0;
                 }
             }
         });
-        
+
         this.game.resources.milk += totalMilk;
         this.milkProduction = totalMilk;
-        
+
         if (milkingCows.length > 0) {
             this.game.uiManager.showNotification(
                 `Milked ${milkingCows.length} cows, produced ${Math.round(totalMilk)}L`,
@@ -184,16 +194,16 @@ export class CattleSystem extends BaseSystem {
         const totalFeedRequired = this.cattle.reduce((total, cow) => {
             return total + cow.breedData.feedRequirement;
         }, 0);
-        
+
         if (this.game.resources.feed >= totalFeedRequired) {
             this.game.resources.feed -= totalFeedRequired;
             this.feedConsumption = totalFeedRequired;
-            
+
             this.cattle.forEach(cow => {
                 cow.feedStatus = 'good';
                 cow.health = Math.min(100, cow.health + 2);
             });
-            
+
             this.game.uiManager.showNotification(
                 `Fed ${this.cattle.length} cattle (${Math.round(totalFeedRequired)}kg feed)`,
                 'success'
@@ -203,7 +213,7 @@ export class CattleSystem extends BaseSystem {
                 cow.feedStatus = 'poor';
                 cow.health = Math.max(0, cow.health - 5);
             });
-            
+
             this.game.uiManager.showNotification(
                 'Insufficient feed! Cattle health declining.',
                 'warning'
@@ -213,10 +223,10 @@ export class CattleSystem extends BaseSystem {
 
     updateCattleHealth() {
         let totalHealth = 0;
-        
+
         this.cattle.forEach(cow => {
             const pasture = this.game.farm.pastures.find(p => p.id === cow.pastureId);
-            
+
             if (pasture) {
                 if (pasture.grassLevel < 20) {
                     cow.health = Math.max(0, cow.health - 1);
@@ -224,14 +234,14 @@ export class CattleSystem extends BaseSystem {
                     cow.health = Math.min(100, cow.health + 0.5);
                 }
             }
-            
+
             const weather = this.game.systems.get('weather')?.getCurrentWeather();
             if (weather) {
                 if (weather.temperature < 0 || weather.temperature > 30) {
                     cow.health = Math.max(0, cow.health - 0.5);
                 }
             }
-            
+
             if (Math.random() < 0.001) {
                 cow.health = Math.max(0, cow.health - 20);
                 this.game.uiManager.showNotification(
@@ -239,10 +249,10 @@ export class CattleSystem extends BaseSystem {
                     'warning'
                 );
             }
-            
+
             totalHealth += cow.health;
         });
-        
+
         this.averageHealth = this.cattle.length > 0 ? totalHealth / this.cattle.length : 100;
     }
 
@@ -252,23 +262,23 @@ export class CattleSystem extends BaseSystem {
                 cow.pregnant = true;
                 cow.gestationDays = 0;
             }
-            
+
             if (cow.pregnant) {
                 cow.gestationDays = (cow.gestationDays || 0) + 1;
-                
+
                 if (cow.gestationDays >= 280) {
                     cow.pregnant = false;
                     cow.lactating = true;
                     cow.daysInMilk = 0;
                     cow.gestationDays = 0;
                     cow.lastCalving = Date.now();
-                    
+
                     if (Math.random() < 0.5) {
                         const calf = this.createCow(cow.breedData, cow.breed);
                         calf.age = 0;
                         calf.lactating = false;
                         this.cattle.push(calf);
-                        
+
                         this.game.uiManager.showNotification(
                             `Cow #${cow.id} has given birth to a calf!`,
                             'success'
@@ -290,21 +300,21 @@ export class CattleSystem extends BaseSystem {
         if (!breed) {
             throw new Error(`Unknown breed: ${breedId}`);
         }
-        
+
         const totalCost = breed.cost * quantity;
         if (this.game.resources.cash < totalCost) {
             throw new Error('Insufficient funds to purchase cattle');
         }
-        
+
         this.game.resources.cash -= totalCost;
-        
+
         for (let i = 0; i < quantity; i++) {
             const cow = this.createCow(breed, breedId);
             this.cattle.push(cow);
         }
-        
+
         this.distributeCattleToPastures();
-        
+
         this.game.uiManager.showNotification(
             `Purchased ${quantity} ${breed.name} cattle for $${totalCost}`,
             'success'
@@ -316,19 +326,19 @@ export class CattleSystem extends BaseSystem {
         if (cowIndex === -1) {
             throw new Error('Cow not found');
         }
-        
+
         const cow = this.cattle[cowIndex];
         const salePrice = cow.breedData.cost * 0.7; // 70% of purchase price
-        
+
         this.game.resources.cash += salePrice;
-        
+
         const pasture = this.game.farm.pastures.find(p => p.id === cow.pastureId);
         if (pasture) {
             pasture.currentStock--;
         }
-        
+
         this.cattle.splice(cowIndex, 1);
-        
+
         this.game.uiManager.showNotification(
             `Sold cow #${cowId} for $${salePrice}`,
             'success'
@@ -352,10 +362,10 @@ export class CattleSystem extends BaseSystem {
 
     calculateFeedStatus() {
         if (this.cattle.length === 0) return 'Good';
-        
+
         const poorFeedCount = this.cattle.filter(c => c.feedStatus === 'poor').length;
         const ratio = poorFeedCount / this.cattle.length;
-        
+
         if (ratio > 0.5) return 'Poor';
         if (ratio > 0.2) return 'Fair';
         return 'Good';

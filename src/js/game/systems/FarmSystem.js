@@ -1,6 +1,12 @@
 import { BaseSystem } from './BaseSystem.js';
 
 export class FarmSystem extends BaseSystem {
+    applyRegulation(type) {
+        if (type === 'nitrogen') {
+            this.maintenanceCosts *= 1.2;
+            this.game.uiManager.showNotification('Regulation event: Nitrogen cap increases costs!', 'warning');
+        }
+    }
     constructor(game) {
         super(game);
         this.maintenanceCosts = 0;
@@ -17,7 +23,7 @@ export class FarmSystem extends BaseSystem {
 
     setupBuildings() {
         const farm = this.game.farm;
-        
+
         this.buildings.set('milking-shed', {
             type: farm.infrastructure.milkingShed,
             capacity: this.getMilkingCapacity(farm.infrastructure.milkingShed),
@@ -45,7 +51,7 @@ export class FarmSystem extends BaseSystem {
 
     update(deltaTime) {
         super.update(deltaTime);
-        
+
         if (this.game.gameTime.hour !== this.lastMaintenanceCheck) {
             this.checkMaintenance();
             this.updateBuildings();
@@ -59,7 +65,7 @@ export class FarmSystem extends BaseSystem {
             if (building.condition < 100 && Math.random() < 0.1) {
                 building.condition = Math.min(100, building.condition + 1);
             }
-            
+
             if (building.condition < 50 && Math.random() < 0.05) {
                 building.condition = Math.max(0, building.condition - 1);
                 this.game.uiManager.showNotification(
@@ -73,11 +79,11 @@ export class FarmSystem extends BaseSystem {
     managePastures() {
         const farm = this.game.farm;
         const weather = this.game.systems.get('weather')?.getCurrentWeather();
-        
+
         farm.pastures.forEach(pasture => {
             const grassGrowthRate = this.calculateGrassGrowth(pasture, weather);
             pasture.grassLevel = Math.min(100, pasture.grassLevel + grassGrowthRate);
-            
+
             if (pasture.currentStock > 0) {
                 const consumptionRate = pasture.currentStock * 0.1;
                 pasture.grassLevel = Math.max(0, pasture.grassLevel - consumptionRate);
@@ -87,22 +93,22 @@ export class FarmSystem extends BaseSystem {
 
     calculateGrassGrowth(pasture, weather = {}) {
         let growthRate = 0.5;
-        
+
         if (weather.temperature > 15) growthRate += 0.3;
         if (weather.rainfall > 50) growthRate += 0.2;
         if (pasture.soilFertility > 70) growthRate += 0.2;
-        
+
         growthRate *= (pasture.quality / 100);
-        
+
         return growthRate;
     }
 
     calculateMaintenanceCosts() {
         const farm = this.game.farm;
         let dailyCost = 0;
-        
+
         dailyCost += farm.size * 2;
-        
+
         for (const [id, building] of this.buildings) {
             switch (id) {
                 case 'milking-shed':
@@ -118,22 +124,22 @@ export class FarmSystem extends BaseSystem {
                     dailyCost += building.capacity * 0.01;
                     break;
             }
-            
+
             if (building.condition < 50) {
                 dailyCost *= 1.5;
             }
         }
-        
+
         this.maintenanceCosts = dailyCost;
     }
 
     checkMaintenance() {
         if (this.game.gameTime.hour === 6) {
             this.game.resources.cash -= this.maintenanceCosts;
-            
+
             if (this.game.resources.cash < 0) {
                 this.game.uiManager.showNotification(
-                    'Warning: Insufficient funds for maintenance!', 
+                    'Warning: Insufficient funds for maintenance!',
                     'warning'
                 );
             }
@@ -146,27 +152,27 @@ export class FarmSystem extends BaseSystem {
             'rotary': 200000,
             'robotic': 500000
         };
-        
+
         const cost = costs[newType];
         if (!cost) {
             throw new Error(`Unknown milking shed type: ${newType}`);
         }
-        
+
         if (this.game.resources.cash < cost) {
             throw new Error('Insufficient funds for upgrade');
         }
-        
+
         this.game.resources.cash -= cost;
         this.game.farm.infrastructure.milkingShed = newType;
-        
+
         const milkingShed = this.buildings.get('milking-shed');
         milkingShed.type = newType;
         milkingShed.capacity = this.getMilkingCapacity(newType);
-        
+
         this.calculateMaintenanceCosts();
-        
+
         this.game.uiManager.showNotification(
-            `Upgraded to ${newType} milking system!`, 
+            `Upgraded to ${newType} milking system!`,
             'success'
         );
     }
@@ -174,21 +180,21 @@ export class FarmSystem extends BaseSystem {
     expandStorage(additionalCapacity) {
         const costPerLiter = 5;
         const cost = additionalCapacity * costPerLiter;
-        
+
         if (this.game.resources.cash < cost) {
             throw new Error('Insufficient funds for storage expansion');
         }
-        
+
         this.game.resources.cash -= cost;
         this.game.farm.infrastructure.storage += additionalCapacity;
-        
+
         const feedStorage = this.buildings.get('feed-storage');
         feedStorage.capacity += additionalCapacity;
-        
+
         this.calculateMaintenanceCosts();
-        
+
         this.game.uiManager.showNotification(
-            `Added ${additionalCapacity}L storage capacity!`, 
+            `Added ${additionalCapacity}L storage capacity!`,
             'success'
         );
     }
@@ -197,12 +203,12 @@ export class FarmSystem extends BaseSystem {
         const farm = this.game.farm;
         let totalCapacity = 0;
         let currentStock = 0;
-        
+
         farm.pastures.forEach(pasture => {
             totalCapacity += pasture.maxStock;
             currentStock += pasture.currentStock;
         });
-        
+
         return currentStock / totalCapacity;
     }
 
@@ -230,11 +236,11 @@ export class FarmSystem extends BaseSystem {
     loadState(state) {
         this.maintenanceCosts = state.maintenanceCosts || 0;
         this.lastMaintenanceCheck = state.lastMaintenanceCheck || 0;
-        
+
         if (state.buildings) {
             this.buildings = new Map(state.buildings);
         }
-        
+
         if (state.infrastructure) {
             this.infrastructure = state.infrastructure;
         }

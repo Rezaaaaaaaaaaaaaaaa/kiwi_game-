@@ -1,6 +1,11 @@
 import { BaseSystem } from './BaseSystem.js';
 
 export class WeatherSystem extends BaseSystem {
+    applyStorm() {
+        this.currentWeather.rainfall *= 0.5;
+        this.currentWeather.conditions = 'storm';
+        this.game.uiManager.showNotification('Storm event: Pasture growth reduced!', 'warning');
+    }
     constructor(game) {
         super(game);
         this.currentWeather = {};
@@ -20,7 +25,7 @@ export class WeatherSystem extends BaseSystem {
 
     setupRegionalData() {
         const region = this.game.currentScenario?.region?.toLowerCase() || 'canterbury';
-        
+
         this.regionalData = {
             'canterbury': {
                 baseTemp: { spring: 15, summer: 22, autumn: 12, winter: 7 },
@@ -53,14 +58,14 @@ export class WeatherSystem extends BaseSystem {
                 extremeRisk: { drought: 0.2, flood: 0.1, wind: 0.15, frost: 0.1 }
             }
         };
-        
+
         this.seasonalPatterns = this.regionalData[region] || this.regionalData['canterbury'];
     }
 
     initializeWeather() {
         const season = this.game.gameTime.season;
         const patterns = this.seasonalPatterns;
-        
+
         this.currentWeather = {
             temperature: patterns.baseTemp[season] + (Math.random() - 0.5) * 10,
             rainfall: Math.max(0, patterns.rainfall[season] * (0.5 + Math.random())),
@@ -87,27 +92,27 @@ export class WeatherSystem extends BaseSystem {
     calculateUV() {
         const season = this.game.gameTime.season;
         const hour = this.game.gameTime.hour;
-        
+
         let baseUV = 0;
         if (season === 'summer') baseUV = 9;
         else if (season === 'spring' || season === 'autumn') baseUV = 6;
         else baseUV = 3;
-        
+
         // UV varies by time of day
         if (hour < 8 || hour > 18) baseUV = 0;
         else if (hour >= 10 && hour <= 14) baseUV *= 1.0;
         else baseUV *= 0.6;
-        
+
         if (this.currentWeather.conditions === 'cloudy') baseUV *= 0.3;
         else if (this.currentWeather.conditions === 'partly-cloudy') baseUV *= 0.7;
-        
+
         return Math.max(0, Math.round(baseUV));
     }
 
     generateForecast() {
         this.forecast = [];
         const currentWeather = { ...this.currentWeather };
-        
+
         for (let i = 1; i <= 7; i++) {
             const nextWeather = {
                 day: i,
@@ -117,7 +122,7 @@ export class WeatherSystem extends BaseSystem {
                 conditions: this.predictConditions(currentWeather),
                 confidence: Math.max(0.4, 1 - (i * 0.1))
             };
-            
+
             this.forecast.push(nextWeather);
             currentWeather.temperature = nextWeather.temperature;
             currentWeather.rainfall = nextWeather.rainfall;
@@ -133,19 +138,19 @@ export class WeatherSystem extends BaseSystem {
 
     update(deltaTime) {
         super.update(deltaTime);
-        
+
         const currentHour = this.game.gameTime.hour;
-        
+
         if (currentHour !== this.lastWeatherUpdate) {
             if (currentHour % 3 === 0) { // Update weather every 3 hours
                 this.updateWeather();
             }
-            
+
             if (currentHour === 0) { // Daily updates
                 this.generateForecast();
                 this.checkExtremeEvents();
             }
-            
+
             this.lastWeatherUpdate = currentHour;
         }
     }
@@ -153,24 +158,24 @@ export class WeatherSystem extends BaseSystem {
     updateWeather() {
         const season = this.game.gameTime.season;
         const patterns = this.seasonalPatterns;
-        
+
         // Gradual weather changes
         const tempChange = (Math.random() - 0.5) * 3;
         const rainChange = (Math.random() - 0.5) * patterns.rainfall[season] * 0.3;
         const windChange = (Math.random() - 0.5) * 5;
-        
+
         this.currentWeather.temperature += tempChange;
         this.currentWeather.rainfall = Math.max(0, this.currentWeather.rainfall + rainChange);
         this.currentWeather.windSpeed = Math.max(0, this.currentWeather.windSpeed + windChange);
-        
+
         // Keep within seasonal bounds
         const minTemp = patterns.baseTemp[season] - 8;
         const maxTemp = patterns.baseTemp[season] + 8;
         this.currentWeather.temperature = Math.max(minTemp, Math.min(maxTemp, this.currentWeather.temperature));
-        
+
         this.currentWeather.conditions = this.determineConditions();
         this.currentWeather.uv = this.calculateUV();
-        
+
         // Update humidity and pressure
         this.currentWeather.humidity = 40 + Math.random() * 50;
         this.currentWeather.pressure += (Math.random() - 0.5) * 10;
@@ -179,22 +184,22 @@ export class WeatherSystem extends BaseSystem {
     checkExtremeEvents() {
         const risks = this.seasonalPatterns.extremeRisk;
         const season = this.game.gameTime.season;
-        
+
         // Check for drought
         if (Math.random() < risks.drought * 0.01) {
             this.triggerExtremeEvent('drought');
         }
-        
+
         // Check for flooding
         if (this.currentWeather.rainfall > 100 && Math.random() < risks.flood * 0.02) {
             this.triggerExtremeEvent('flood');
         }
-        
+
         // Check for wind storms
         if (this.currentWeather.windSpeed > 40 && Math.random() < risks.wind * 0.02) {
             this.triggerExtremeEvent('windstorm');
         }
-        
+
         // Check for frost
         if (season === 'winter' && this.currentWeather.temperature < 2 && Math.random() < risks.frost * 0.03) {
             this.triggerExtremeEvent('frost');
@@ -209,10 +214,10 @@ export class WeatherSystem extends BaseSystem {
             severity: 0.5 + Math.random() * 0.5,
             active: true
         };
-        
+
         this.extremeEvents.push(event);
         this.currentWeather.extremeEvents.push(eventType);
-        
+
         // Apply immediate effects
         switch (eventType) {
             case 'drought':
@@ -229,7 +234,7 @@ export class WeatherSystem extends BaseSystem {
                 this.currentWeather.temperature = Math.min(0, this.currentWeather.temperature - 3);
                 break;
         }
-        
+
         this.game.uiManager.showNotification(
             `${eventType.charAt(0).toUpperCase() + eventType.slice(1)} warning issued!`,
             'warning'
@@ -255,7 +260,7 @@ export class WeatherSystem extends BaseSystem {
             }
             return true;
         });
-        
+
         // Update current weather extreme events
         this.currentWeather.extremeEvents = this.extremeEvents
             .filter(e => e.active)
@@ -270,7 +275,7 @@ export class WeatherSystem extends BaseSystem {
             workEfficiency: 1.0,
             buildingWear: 1.0
         };
-        
+
         // Temperature effects
         if (this.currentWeather.temperature < 5) {
             effects.grassGrowth *= 0.3;
@@ -282,7 +287,7 @@ export class WeatherSystem extends BaseSystem {
             effects.grassGrowth *= 1.2;
             effects.cattleComfort *= 1.1;
         }
-        
+
         // Rainfall effects
         if (this.currentWeather.rainfall > 80) {
             effects.workEfficiency *= 0.6;
@@ -292,13 +297,13 @@ export class WeatherSystem extends BaseSystem {
         } else if (this.currentWeather.rainfall < 5) {
             effects.grassGrowth *= 0.5;
         }
-        
+
         // Wind effects
         if (this.currentWeather.windSpeed > 30) {
             effects.workEfficiency *= 0.7;
             effects.buildingWear *= 1.5;
         }
-        
+
         // Extreme event effects
         this.currentWeather.extremeEvents.forEach(event => {
             switch (event) {
@@ -320,7 +325,7 @@ export class WeatherSystem extends BaseSystem {
                     break;
             }
         });
-        
+
         return effects;
     }
 
