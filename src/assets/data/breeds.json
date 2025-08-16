@@ -1,0 +1,208 @@
+{
+  "friesian": {
+    "id": "friesian",
+    "name": "Holstein-Friesian",
+    "origin": "Netherlands/Germany",
+    "description": "The world's most popular dairy breed. Large, black and white cows known for high milk production.",
+    "characteristics": {
+      "size": "large",
+      "colors": ["black", "white"],
+      "temperament": "docile",
+      "adaptability": "high"
+    },
+    "production": {
+      "milkYield": 25,
+      "butterfat": 3.6,
+      "protein": 3.2,
+      "lactationLength": 305
+    },
+    "economics": {
+      "purchasePrice": 1500,
+      "feedRequirement": 18,
+      "maintenanceCost": 45,
+      "lifespan": 6
+    },
+    "breeding": {
+      "maturityAge": 15,
+      "gestationPeriod": 280,
+      "calfingInterval": 365,
+      "fertility": 85
+    },
+    "advantages": [
+      "Highest milk production",
+      "Well-established genetics",
+      "Good feed conversion",
+      "Wide availability"
+    ],
+    "disadvantages": [
+      "Higher feed requirements",
+      "Can be sensitive to heat",
+      "May have lower milk fat content"
+    ]
+  },
+  "jersey": {
+    "id": "jersey",
+    "name": "Jersey",
+    "origin": "Jersey Island",
+    "description": "Small, efficient cows producing rich milk with high butterfat content. Excellent for premium dairy products.",
+    "characteristics": {
+      "size": "small",
+      "colors": ["fawn", "brown", "gray"],
+      "temperament": "gentle",
+      "adaptability": "very-high"
+    },
+    "production": {
+      "milkYield": 18,
+      "butterfat": 4.9,
+      "protein": 3.8,
+      "lactationLength": 305
+    },
+    "economics": {
+      "purchasePrice": 1300,
+      "feedRequirement": 14,
+      "maintenanceCost": 35,
+      "lifespan": 7
+    },
+    "breeding": {
+      "maturityAge": 14,
+      "gestationPeriod": 279,
+      "calfingInterval": 350,
+      "fertility": 88
+    },
+    "advantages": [
+      "High butterfat milk",
+      "Efficient feed conversion",
+      "Heat tolerance",
+      "Longer productive life",
+      "Premium milk prices"
+    ],
+    "disadvantages": [
+      "Lower milk volume",
+      "Smaller body size",
+      "Can be more nervous"
+    ]
+  },
+  "crossbred": {
+    "id": "crossbred",
+    "name": "Crossbred",
+    "origin": "Various",
+    "description": "Hybrid cattle combining the best traits of different breeds for balanced production and adaptability.",
+    "characteristics": {
+      "size": "medium",
+      "colors": ["mixed"],
+      "temperament": "mixed",
+      "adaptability": "high"
+    },
+    "production": {
+      "milkYield": 22,
+      "butterfat": 4.1,
+      "protein": 3.4,
+      "lactationLength": 305
+    },
+    "economics": {
+      "purchasePrice": 1400,
+      "feedRequirement": 16,
+      "maintenanceCost": 40,
+      "lifespan": 6
+    },
+    "breeding": {
+      "maturityAge": 14.5,
+      "gestationPeriod": 280,
+      "calfingInterval": 355,
+      "fertility": 90
+    },
+    "advantages": [
+      "Balanced milk production",
+      "Good adaptability",
+      "Hybrid vigor",
+      "Disease resistance"
+    ],
+    "disadvantages": [
+      "Variable genetics",
+      "May not excel in specific traits",
+      "Breeding complexity"
+    ]
+  },
+  "ayrshire": {
+    "id": "ayrshire",
+    "name": "Ayrshire",
+    "origin": "Scotland",
+    "description": "Hardy red and white cattle known for their longevity and ability to thrive in harsh conditions.",
+    "characteristics": {
+      "size": "medium",
+      "colors": ["red", "white"],
+      "temperament": "active",
+      "adaptability": "very-high"
+    },
+    "production": {
+      "milkYield": 20,
+      "butterfat": 4.0,
+      "protein": 3.4,
+      "lactationLength": 305
+    },
+    "economics": {
+      "purchasePrice": 1350,
+      "feedRequirement": 15,
+      "maintenanceCost": 38,
+      "lifespan": 7
+    },
+    "breeding": {
+      "maturityAge": 15,
+      "gestationPeriod": 280,
+      "calfingInterval": 360,
+      "fertility": 87
+    },
+    "advantages": [
+      "Excellent longevity",
+      "Hardy constitution",
+      "Good grazing ability",
+      "Strong legs and feet"
+    ],
+    "disadvantages": [
+      "Can be more active/nervous",
+      "Less common breed",
+      "Lower peak production"
+    ]
+  },
+  "guernsey": {
+    "id": "guernsey",
+    "name": "Guernsey",
+    "origin": "Guernsey Island",
+    "description": "Golden-colored cattle producing distinctive golden milk with high beta-carotene content.",
+    "characteristics": {
+      "size": "medium",
+      "colors": ["golden", "fawn"],
+      "temperament": "docile",
+      "adaptability": "high"
+    },
+    "production": {
+      "milkYield": 19,
+      "butterfat": 4.5,
+      "protein": 3.7,
+      "lactationLength": 305
+    },
+    "economics": {
+      "purchasePrice": 1380,
+      "feedRequirement": 15,
+      "maintenanceCost": 37,
+      "lifespan": 6.5
+    },
+    "breeding": {
+      "maturityAge": 15,
+      "gestationPeriod": 280,
+      "calfingInterval": 360,
+      "fertility": 86
+    },
+    "advantages": [
+      "Golden milk premium",
+      "High protein content",
+      "Good grazing efficiency",
+      "Calm temperament"
+    ],
+    "disadvantages": [
+      "Lower total milk volume",
+      "Specialized market needed",
+      "Less common"
+    ]
+  }
+}

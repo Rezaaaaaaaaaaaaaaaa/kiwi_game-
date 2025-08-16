@@ -1,0 +1,371 @@
+{
+  "tractors": {
+    "compact": {
+      "id": "tractor-compact",
+      "name": "Compact Tractor",
+      "manufacturer": "Various",
+      "category": "tractor",
+      "power": "30-60 HP",
+      "description": "Perfect for small operations and tight spaces. Ideal for feeding, light cultivation, and maintenance work.",
+      "specifications": {
+        "horsepower": 45,
+        "fuelType": "diesel",
+        "fuelConsumption": 6,
+        "workingWidth": 2.5,
+        "maxSpeed": 25
+      },
+      "economics": {
+        "purchasePrice": 85000,
+        "annualDepreciation": 15,
+        "maintenanceCost": 4500,
+        "serviceInterval": 250
+      },
+      "capabilities": [
+        "feeding",
+        "mowing",
+        "light-cultivation",
+        "transport"
+      ],
+      "advantages": [
+        "Lower initial cost",
+        "Good maneuverability",
+        "Lower fuel consumption",
+        "Easy to operate"
+      ],
+      "disadvantages": [
+        "Limited power for heavy work",
+        "Slower work rates",
+        "May need multiple passes"
+      ]
+    },
+    "medium": {
+      "id": "tractor-medium",
+      "name": "Medium Tractor",
+      "manufacturer": "Various",
+      "category": "tractor",
+      "power": "80-120 HP",
+      "description": "Versatile workhorse suitable for most dairy farm operations. Good balance of power and efficiency.",
+      "specifications": {
+        "horsepower": 100,
+        "fuelType": "diesel",
+        "fuelConsumption": 12,
+        "workingWidth": 4.0,
+        "maxSpeed": 35
+      },
+      "economics": {
+        "purchasePrice": 150000,
+        "annualDepreciation": 15,
+        "maintenanceCost": 8500,
+        "serviceInterval": 250
+      },
+      "capabilities": [
+        "cultivation",
+        "harvesting",
+        "feeding",
+        "heavy-transport"
+      ],
+      "advantages": [
+        "Good power-to-cost ratio",
+        "Versatile applications",
+        "Reliable performance",
+        "Wide implement compatibility"
+      ],
+      "disadvantages": [
+        "Higher fuel consumption",
+        "More expensive maintenance",
+        "May be oversized for small tasks"
+      ]
+    },
+    "large": {
+      "id": "tractor-large",
+      "name": "Large Tractor",
+      "manufacturer": "Various",
+      "category": "tractor",
+      "power": "150-250 HP",
+      "description": "High-powered tractor for large operations and heavy-duty work. Maximum efficiency for big jobs.",
+      "specifications": {
+        "horsepower": 200,
+        "fuelType": "diesel",
+        "fuelConsumption": 20,
+        "workingWidth": 6.0,
+        "maxSpeed": 40
+      },
+      "economics": {
+        "purchasePrice": 250000,
+        "annualDepreciation": 15,
+        "maintenanceCost": 15000,
+        "serviceInterval": 300
+      },
+      "capabilities": [
+        "heavy-cultivation",
+        "large-scale-harvesting",
+        "heavy-transport",
+        "pto-intensive-work"
+      ],
+      "advantages": [
+        "High productivity",
+        "Handles heavy implements",
+        "Fast work rates",
+        "Advanced technology"
+      ],
+      "disadvantages": [
+        "High purchase cost",
+        "High fuel consumption",
+        "Expensive maintenance",
+        "May compact soil"
+      ]
+    }
+  },
+  "milkingSystems": {
+    "herringbone": {
+      "id": "milking-herringbone",
+      "name": "Herringbone Milking Parlour",
+      "category": "milking",
+      "capacity": "10-40 units",
+      "description": "Traditional parlour design where cows stand at an angle. Good balance of throughput and cost.",
+      "specifications": {
+        "positions": 20,
+        "cowsPerHour": 120,
+        "powerRequirement": "15 kW",
+        "waterUsage": 1500,
+        "laborRequirement": 2
+      },
+      "economics": {
+        "purchasePrice": 75000,
+        "installationCost": 25000,
+        "annualDepreciation": 10,
+        "maintenanceCost": 3500
+      },
+      "advantages": [
+        "Proven design",
+        "Good throughput",
+        "Relatively affordable",
+        "Easy to retrofit"
+      ],
+      "disadvantages": [
+        "Manual cup attachment",
+        "Higher labor requirement",
+        "Less cow comfort"
+      ]
+    },
+    "rotary": {
+      "id": "milking-rotary",
+      "name": "Rotary Milking Platform",
+      "category": "milking",
+      "capacity": "40-80 units",
+      "description": "Continuous flow system where cows are milked while platform rotates. High throughput design.",
+      "specifications": {
+        "positions": 50,
+        "cowsPerHour": 300,
+        "powerRequirement": "45 kW",
+        "waterUsage": 3000,
+        "laborRequirement": 3
+      },
+      "economics": {
+        "purchasePrice": 200000,
+        "installationCost": 80000,
+        "annualDepreciation": 10,
+        "maintenanceCost": 12000
+      },
+      "advantages": [
+        "Very high throughput",
+        "Consistent routine",
+        "Good cow flow",
+        "Impressive to visitors"
+      ],
+      "disadvantages": [
+        "High capital cost",
+        "Complex system",
+        "Higher power usage",
+        "Requires skilled operators"
+      ]
+    },
+    "robotic": {
+      "id": "milking-robotic",
+      "name": "Robotic Milking System",
+      "category": "milking",
+      "capacity": "60-70 cows per unit",
+      "description": "Automated system allowing cows to be milked on demand. Provides detailed individual cow data.",
+      "specifications": {
+        "positions": 1,
+        "cowsPerDay": 180,
+        "powerRequirement": "12 kW",
+        "waterUsage": 800,
+        "laborRequirement": 0.5
+      },
+      "economics": {
+        "purchasePrice": 500000,
+        "installationCost": 100000,
+        "annualDepreciation": 12,
+        "maintenanceCost": 25000
+      },
+      "advantages": [
+        "24/7 operation",
+        "Reduced labor",
+        "Individual cow monitoring",
+        "Flexible milking times"
+      ],
+      "disadvantages": [
+        "Very high capital cost",
+        "Complex technology",
+        "Requires excellent management",
+        "Higher maintenance costs"
+      ]
+    }
+  },
+  "feedingEquipment": {
+    "mixerWagon": {
+      "id": "mixer-wagon",
+      "name": "Total Mixed Ration Wagon",
+      "category": "feeding",
+      "capacity": "15-30 m³",
+      "description": "Mobile feeding system that mixes and distributes feed. Essential for efficient feeding operations.",
+      "specifications": {
+        "capacity": 20,
+        "mixingTime": 15,
+        "powerRequirement": "80 HP PTO",
+        "unloadingRate": 200,
+        "scales": true
+      },
+      "economics": {
+        "purchasePrice": 85000,
+        "annualDepreciation": 15,
+        "maintenanceCost": 6500,
+        "serviceInterval": 500
+      },
+      "advantages": [
+        "Consistent feed mixing",
+        "Accurate rationing",
+        "Time efficient",
+        "Reduces feed waste"
+      ],
+      "disadvantages": [
+        "Requires tractor power",
+        "High initial cost",
+        "Needs regular maintenance"
+      ]
+    },
+    "feedPad": {
+      "id": "feed-pad",
+      "name": "Concrete Feed Pad",
+      "category": "feeding",
+      "capacity": "Variable",
+      "description": "Permanent feeding area with concrete surface. Allows for efficient feed distribution and cow access.",
+      "specifications": {
+        "width": 4,
+        "drainageSlope": 2,
+        "reinforcement": "mesh",
+        "feedBarriers": "included"
+      },
+      "economics": {
+        "purchasePrice": 35000,
+        "installationCost": 15000,
+        "annualDepreciation": 5,
+        "maintenanceCost": 800
+      },
+      "advantages": [
+        "Weather protection",
+        "Reduced feed waste",
+        "Better cow access",
+        "Easy cleaning"
+      ],
+      "disadvantages": [
+        "Fixed location",
+        "Requires drainage",
+        "Initial construction cost"
+      ]
+    }
+  },
+  "implements": {
+    "mower": {
+      "id": "rotary-mower",
+      "name": "Rotary Mower",
+      "category": "cultivation",
+      "workingWidth": "2.5-6.0m",
+      "description": "Essential for grass cutting and pasture maintenance. Keeps pastures productive and healthy.",
+      "specifications": {
+        "cuttingWidth": 3.5,
+        "powerRequirement": "45 HP PTO",
+        "cuttingHeight": "25-100mm",
+        "bladeType": "rotary"
+      },
+      "economics": {
+        "purchasePrice": 18000,
+        "annualDepreciation": 20,
+        "maintenanceCost": 1200,
+        "serviceInterval": 100
+      },
+      "advantages": [
+        "Fast cutting speed",
+        "Good finish quality",
+        "Handles rough terrain",
+        "Relatively simple"
+      ],
+      "disadvantages": [
+        "Higher power requirement",
+        "Blade maintenance",
+        "Can scatter debris"
+      ]
+    },
+    "cultivator": {
+      "id": "disc-cultivator",
+      "name": "Disc Cultivator",
+      "category": "cultivation",
+      "workingWidth": "3.0-8.0m",
+      "description": "Prepares seedbeds and incorporates crop residues. Essential for pasture renovation.",
+      "specifications": {
+        "workingWidth": 4.0,
+        "powerRequirement": "25 HP per meter",
+        "workingDepth": "50-200mm",
+        "discDiameter": 560
+      },
+      "economics": {
+        "purchasePrice": 25000,
+        "annualDepreciation": 18,
+        "maintenanceCost": 1800,
+        "serviceInterval": 150
+      },
+      "advantages": [
+        "Good soil mixing",
+        "Handles residue well",
+        "Adjustable depth",
+        "Versatile tool"
+      ],
+      "disadvantages": [
+        "Can create hardpan",
+        "Disc wear",
+        "Weather dependent"
+      ]
+    },
+    "spreader": {
+      "id": "fertilizer-spreader",
+      "name": "Broadcast Spreader",
+      "category": "cultivation",
+      "capacity": "1000-3000L",
+      "description": "Applies fertilizer and seed accurately across paddocks. Essential for maintaining soil fertility.",
+      "specifications": {
+        "hopperCapacity": 1500,
+        "workingWidth": 24,
+        "powerRequirement": "25 HP PTO",
+        "applicationType": "broadcast"
+      },
+      "economics": {
+        "purchasePrice": 15000,
+        "annualDepreciation": 20,
+        "maintenanceCost": 900,
+        "serviceInterval": 200
+      },
+      "advantages": [
+        "Even application",
+        "Large working width",
+        "Quick coverage",
+        "Relatively simple"
+      ],
+      "disadvantages": [
+        "Wind sensitivity",
+        "Calibration required",
+        "Material handling"
+      ]
+    }
+  }
+}

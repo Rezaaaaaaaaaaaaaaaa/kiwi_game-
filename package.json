@@ -1,0 +1,24 @@
+{
+  "name": "kiwi-dairy-farm-game",
+  "version": "1.0.0",
+  "description": "A comprehensive New Zealand dairy farming simulation game",
+  "main": "src/index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "build": "echo 'Build process not yet implemented'",
+    "test": "echo 'Tests not yet implemented'",
+    "lint": "echo 'Linting not yet implemented'"
+  },
+  "keywords": [
+    "game",
+    "farming",
+    "simulation",
+    "new-zealand",
+    "dairy"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "serve": "^14.2.4"
+  }
+}

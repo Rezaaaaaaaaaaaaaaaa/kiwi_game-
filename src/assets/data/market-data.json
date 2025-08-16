@@ -1,0 +1,249 @@
+{
+  "basePrices": {
+    "milk": {
+      "basePrice": 0.65,
+      "currency": "NZD",
+      "unit": "litre",
+      "description": "Farm gate milk price",
+      "volatility": 0.15,
+      "seasonalVariation": {
+        "spring": 1.05,
+        "summer": 1.10,
+        "autumn": 0.95,
+        "winter": 0.90
+      }
+    },
+    "feed": {
+      "basePrice": 0.25,
+      "currency": "NZD",
+      "unit": "kg",
+      "description": "Supplementary feed cost",
+      "volatility": 0.25,
+      "seasonalVariation": {
+        "spring": 0.90,
+        "summer": 0.85,
+        "autumn": 1.10,
+        "winter": 1.15
+      }
+    },
+    "cattle": {
+      "basePrice": 1500,
+      "currency": "NZD",
+      "unit": "head",
+      "description": "Average dairy cow price",
+      "volatility": 0.10,
+      "breedMultipliers": {
+        "friesian": 1.0,
+        "jersey": 1.05,
+        "crossbred": 0.95,
+        "ayrshire": 0.98,
+        "guernsey": 1.02
+      }
+    }
+  },
+  "contracts": {
+    "fonterra": {
+      "id": "fonterra",
+      "name": "Fonterra Co-operative Group",
+      "type": "cooperative",
+      "description": "New Zealand's largest dairy cooperative, processing 85% of the country's milk",
+      "milkPrice": {
+        "basePrice": 0.68,
+        "qualityPremium": 0.05,
+        "volumeBonus": {
+          "threshold": 500000,
+          "bonus": 0.02
+        },
+        "seasonalPremium": {
+          "winter": 0.03,
+          "summer": -0.01
+        }
+      },
+      "paymentTerms": "monthly",
+      "requirements": {
+        "minimumVolume": 50000,
+        "qualityStandards": "high",
+        "shareOwnership": true
+      },
+      "benefits": [
+        "Stable long-term pricing",
+        "Quality premiums available",
+        "Access to global markets",
+        "Technical support",
+        "Dividend payments"
+      ]
+    },
+    "openCountry": {
+      "id": "openCountry",
+      "name": "Open Country Dairy",
+      "type": "processor",
+      "description": "Independent processor focusing on premium dairy products",
+      "milkPrice": {
+        "basePrice": 0.66,
+        "qualityPremium": 0.02,
+        "loyaltyBonus": 0.01
+      },
+      "paymentTerms": "bi-weekly",
+      "requirements": {
+        "minimumVolume": 25000,
+        "qualityStandards": "standard",
+        "exclusivity": false
+      },
+      "benefits": [
+        "Faster payments",
+        "Lower minimum volume",
+        "Flexible terms",
+        "Personal service"
+      ]
+    },
+    "westland": {
+      "id": "westland",
+      "name": "Westland Milk Products",
+      "type": "cooperative",
+      "description": "West Coast focused cooperative with premium positioning",
+      "milkPrice": {
+        "basePrice": 0.70,
+        "organicPremium": 0.15,
+        "grassFedPremium": 0.08
+      },
+      "paymentTerms": "monthly",
+      "requirements": {
+        "minimumVolume": 75000,
+        "qualityStandards": "premium",
+        "location": "west-coast"
+      },
+      "benefits": [
+        "Premium pricing",
+        "Organic options",
+        "Grass-fed premiums",
+        "Environmental focus"
+      ]
+    }
+  },
+  "feedSuppliers": {
+    "ruralSupplies": {
+      "id": "ruralSupplies",
+      "name": "Rural Feed Supplies",
+      "description": "Major feed supplier with nationwide distribution",
+      "products": {
+        "palmKernel": {
+          "price": 0.22,
+          "protein": 18,
+          "energy": 12.5,
+          "bulkDiscount": 0.10
+        },
+        "maize": {
+          "price": 0.28,
+          "protein": 9,
+          "energy": 14.2,
+          "bulkDiscount": 0.08
+        },
+        "pastureCube": {
+          "price": 0.35,
+          "protein": 16,
+          "energy": 11.8,
+          "bulkDiscount": 0.12
+        },
+        "molasses": {
+          "price": 0.18,
+          "protein": 4,
+          "energy": 13.0,
+          "bulkDiscount": 0.05
+        }
+      },
+      "deliveryTerms": {
+        "minimumOrder": 1000,
+        "deliveryFee": 150,
+        "freeDeliveryThreshold": 5000,
+        "paymentTerms": "30 days"
+      }
+    },
+    "coastalFeeds": {
+      "id": "coastalFeeds",
+      "name": "Coastal Feeds Limited",
+      "description": "Regional supplier specializing in quality feeds",
+      "products": {
+        "premiumPellets": {
+          "price": 0.42,
+          "protein": 20,
+          "energy": 13.5,
+          "bulkDiscount": 0.15
+        },
+        "barley": {
+          "price": 0.26,
+          "protein": 12,
+          "energy": 13.8,
+          "bulkDiscount": 0.08
+        },
+        "brewersGrain": {
+          "price": 0.20,
+          "protein": 25,
+          "energy": 10.2,
+          "bulkDiscount": 0.10
+        }
+      },
+      "deliveryTerms": {
+        "minimumOrder": 500,
+        "deliveryFee": 100,
+        "freeDeliveryThreshold": 3000,
+        "paymentTerms": "14 days"
+      }
+    }
+  },
+  "economicFactors": {
+    "globalMarket": {
+      "priceDrivers": [
+        "Global dairy demand",
+        "Currency exchange rates",
+        "Climate conditions",
+        "Political stability",
+        "Trade agreements"
+      ],
+      "majorMarkets": [
+        "China",
+        "United States",
+        "European Union",
+        "Southeast Asia",
+        "Middle East"
+      ]
+    },
+    "localFactors": {
+      "priceDrivers": [
+        "Seasonal production patterns",
+        "Weather conditions",
+        "Regulatory changes",
+        "Input costs",
+        "Competition levels"
+      ],
+      "regulations": [
+        "Emissions Trading Scheme",
+        "Nitrogen limits",
+        "Freshwater regulations",
+        "Animal welfare standards"
+      ]
+    }
+  },
+  "historicalTrends": {
+    "milkPrice": {
+      "2020": 0.59,
+      "2021": 0.71,
+      "2022": 0.68,
+      "2023": 0.65,
+      "2024": 0.67
+    },
+    "feedCost": {
+      "2020": 0.22,
+      "2021": 0.28,
+      "2022": 0.32,
+      "2023": 0.26,
+      "2024": 0.24
+    },
+    "profitability": {
+      "2020": "moderate",
+      "2021": "high",
+      "2022": "low",
+      "2023": "moderate",
+      "2024": "good"
+    }
+  }
+}

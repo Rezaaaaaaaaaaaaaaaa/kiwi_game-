@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiwi Dairy: Farm to Fortune</title>
+    <link rel="stylesheet" href="src/css/main.css">
+    <link rel="stylesheet" href="src/css/ui.css">
+    <link rel="stylesheet" href="src/css/game.css">
+</head>
+<body>
+    <div id="game-container">
+        <header id="game-header">
+            <h1>Kiwi Dairy: Farm to Fortune</h1>
+            <div id="game-stats"></div>
+        </header>
+        
+        <main id="game-main">
+            <div id="menu-screen" class="screen active">
+                <div class="menu-container">
+                    <h2>Welcome to Kiwi Dairy</h2>
+                    <div class="menu-buttons">
+                        <button id="new-game-btn" class="menu-btn">New Game</button>
+                        <button id="load-game-btn" class="menu-btn">Load Game</button>
+                        <button id="scenarios-btn" class="menu-btn">Scenarios</button>
+                        <button id="tutorial-btn" class="menu-btn">Tutorial</button>
+                        <button id="settings-btn" class="menu-btn">Settings</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="scenario-select-screen" class="screen">
+                <div class="scenario-container">
+                    <h2>Choose Your Challenge</h2>
+                    <div id="scenario-list"></div>
+                    <button id="back-to-menu" class="back-btn">Back to Menu</button>
+                </div>
+            </div>
+            
+            <div id="game-screen" class="screen">
+                <div id="game-ui">
+                    <div id="top-bar">
+                        <div id="resources-display"></div>
+                        <div id="date-weather"></div>
+                        <div id="game-controls">
+                            <button id="pause-btn">Pause</button>
+                            <button id="save-btn">Save</button>
+                            <button id="menu-btn">Menu</button>
+                        </div>
+                    </div>
+                    
+                    <div id="main-game-area">
+                        <div id="farm-view">
+                            <canvas id="farm-canvas" width="800" height="600"></canvas>
+                        </div>
+                        
+                        <div id="sidebar">
+                            <div id="info-panels">
+                                <div id="farm-info" class="info-panel">
+                                    <h3>Farm Overview</h3>
+                                    <div id="farm-stats"></div>
+                                </div>
+                                
+                                <div id="cattle-info" class="info-panel">
+                                    <h3>Cattle Management</h3>
+                                    <div id="cattle-stats"></div>
+                                </div>
+                                
+                                <div id="production-info" class="info-panel">
+                                    <h3>Production</h3>
+                                    <div id="production-stats"></div>
+                                </div>
+                            </div>
+                            
+                            <div id="action-buttons">
+                                <button class="action-btn" data-action="feed-cattle">Feed Cattle</button>
+                                <button class="action-btn" data-action="milk-cows">Milk Cows</button>
+                                <button class="action-btn" data-action="manage-pasture">Manage Pasture</button>
+                                <button class="action-btn" data-action="buy-cattle">Buy Cattle</button>
+                                <button class="action-btn" data-action="sell-milk">Sell Milk</button>
+                                <button class="action-btn" data-action="upgrade-farm">Upgrade Farm</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <div id="modal-overlay" class="modal-overlay">
+            <div id="modal-content" class="modal-content">
+                <!-- Dynamic modal content -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load JavaScript modules -->
+    <script type="module" src="src/js/main.js"></script>
+</body>
+</html>
