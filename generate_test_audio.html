@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Test Audio for Kiwi Farm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f8f0;
+        }
+        .sound-generator {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .download-link {
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .instructions {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Generate Test Audio for Kiwi Farm Game</h1>
+    
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Click the buttons below to generate simple test sounds</li>
+            <li>Right-click the download links and "Save As" to your audio folders</li>
+            <li>Use the exact filenames shown for automatic game integration</li>
+            <li>Replace with real audio from the sources provided later</li>
+        </ol>
+    </div>
+
+    <div class="sound-generator">
+        <h3>🐄 Farm Sounds</h3>
+        <button onclick="generateCowMoo()">Generate Cow Moo</button>
+        <div id="cow-download"></div>
+        
+        <button onclick="generateMilking()">Generate Milking Sound</button>
+        <div id="milking-download"></div>
+    </div>
+
+    <div class="sound-generator">
+        <h3>🖱️ UI Sounds</h3>
+        <button onclick="generateUIClick()">Generate UI Click</button>
+        <div id="click-download"></div>
+        
+        <button onclick="generateSuccess()">Generate Success Sound</button>
+        <div id="success-download"></div>
+        
+        <button onclick="generateError()">Generate Error Sound</button>
+        <div id="error-download"></div>
+    </div>
+
+    <div class="sound-generator">
+        <h3>🌿 Nature Sounds</h3>
+        <button onclick="generateRain()">Generate Rain</button>
+        <div id="rain-download"></div>
+        
+        <button onclick="generateWind()">Generate Wind</button>
+        <div id="wind-download"></div>
+        
+        <button onclick="generateBirds()">Generate Birds</button>
+        <div id="birds-download"></div>
+    </div>
+
+    <div class="sound-generator">
+        <h3>🎵 Background Music</h3>
+        <button onclick="generatePeacefulFarm()">Generate Peaceful Farm Music</button>
+        <div id="peaceful-download"></div>
+        
+        <button onclick="generateMenuTheme()">Generate Menu Theme</button>
+        <div id="menu-download"></div>
+    </div>
+
+    <script>
+        // Audio context for generating sounds
+        let audioContext;
+        
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+
+        function generateTone(frequency, duration, type = 'sine') {
+            const ctx = initAudioContext();
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+            
+            oscillator.start(ctx.currentTime);
+            oscillator.stop(ctx.currentTime + duration);
+        }
+
+        function createDownloadLink(audioBlob, filename, containerId) {
+            const url = URL.createObjectURL(audioBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.textContent = `Download ${filename}`;
+            link.className = 'download-link';
+            
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            container.appendChild(link);
+        }
+
+        function generateCowMoo() {
+            // Simple "moo" sound using multiple tones
+            generateTone(200, 0.3, 'sawtooth');
+            setTimeout(() => generateTone(150, 0.4, 'sawtooth'), 300);
+            
+            // Create a simple audio blob (placeholder)
+            const canvas = document.createElement('canvas');
+            canvas.toBlob(blob => {
+                // This is a placeholder - in reality you'd need to capture the audio
+                createDownloadLink(new Blob(['Simple cow moo sound placeholder']), 'cow-moo.mp3', 'cow-download');
+            });
+        }
+
+        function generateMilking() {
+            // Rhythmic sound for milking
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => generateTone(300, 0.1, 'triangle'), i * 200);
+            }
+            createDownloadLink(new Blob(['Milking sound placeholder']), 'milking.mp3', 'milking-download');
+        }
+
+        function generateUIClick() {
+            generateTone(800, 0.1, 'square');
+            createDownloadLink(new Blob(['UI click sound placeholder']), 'ui-click.mp3', 'click-download');
+        }
+
+        function generateSuccess() {
+            generateTone(600, 0.2);
+            setTimeout(() => generateTone(800, 0.2), 200);
+            createDownloadLink(new Blob(['Success sound placeholder']), 'success.mp3', 'success-download');
+        }
+
+        function generateError() {
+            generateTone(300, 0.3, 'sawtooth');
+            createDownloadLink(new Blob(['Error sound placeholder']), 'error.mp3', 'error-download');
+        }
+
+        function generateRain() {
+            // White noise for rain
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => generateTone(Math.random() * 1000 + 200, 0.05, 'triangle'), Math.random() * 2000);
+            }
+            createDownloadLink(new Blob(['Rain sound placeholder']), 'rain.mp3', 'rain-download');
+        }
+
+        function generateWind() {
+            generateTone(150, 2, 'sawtooth');
+            createDownloadLink(new Blob(['Wind sound placeholder']), 'wind.mp3', 'wind-download');
+        }
+
+        function generateBirds() {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    generateTone(1000 + Math.random() * 500, 0.2, 'sine');
+                }, i * 400);
+            }
+            createDownloadLink(new Blob(['Birds sound placeholder']), 'birds.mp3', 'birds-download');
+        }
+
+        function generatePeacefulFarm() {
+            // Simple chord progression
+            generateTone(261.63, 1); // C
+            setTimeout(() => generateTone(329.63, 1), 1000); // E
+            setTimeout(() => generateTone(392.00, 1), 2000); // G
+            createDownloadLink(new Blob(['Peaceful farm music placeholder']), 'peaceful-farm.mp3', 'peaceful-download');
+        }
+
+        function generateMenuTheme() {
+            // Upbeat melody
+            const notes = [261.63, 293.66, 329.63, 349.23]; // C, D, E, F
+            notes.forEach((note, index) => {
+                setTimeout(() => generateTone(note, 0.3), index * 300);
+            });
+            createDownloadLink(new Blob(['Menu theme placeholder']), 'menu-theme.mp3', 'menu-download');
+        }
+    </script>
+
+    <div class="instructions">
+        <h3>🔄 Next Steps:</h3>
+        <p><strong>For Better Quality Audio:</strong></p>
+        <ul>
+            <li><strong>Cow sounds:</strong> Visit <a href="https://freesound.org" target="_blank">freesound.org</a>, search "cow moo CC0"</li>
+            <li><strong>UI sounds:</strong> Visit <a href="https://mixkit.co/free-sound-effects/interface/" target="_blank">mixkit.co</a></li>
+            <li><strong>Music:</strong> Visit <a href="https://incompetech.com" target="_blank">incompetech.com</a> for background music</li>
+            <li><strong>Nature sounds:</strong> Search "rain CC0" or "wind CC0" on freesound.org</li>
+        </ul>
+        
+        <p><strong>File Placement:</strong></p>
+        <ul>
+            <li>Sound effects → <code>src/assets/audio/sfx/</code></li>
+            <li>Background music → <code>src/assets/audio/music/</code></li>
+        </ul>
+    </div>
+</body>
+</html>

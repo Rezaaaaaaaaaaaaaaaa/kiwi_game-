@@ -13,9 +13,35 @@
 
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #388e3c 0%, #66bb6a 100%);
+            background: 
+                /* Sky gradient */
+                linear-gradient(to bottom, #87CEEB 0%, #98D8E8 40%, #B0E0E6 70%, #c8e6c9 100%),
+                /* Rolling hills */
+                radial-gradient(ellipse at 30% 100%, rgba(76, 175, 80, 0.3) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 100%, rgba(129, 199, 132, 0.3) 0%, transparent 60%);
+            background-attachment: fixed;
+            background-size: 100% 100%, 800px 400px, 800px 400px;
+            animation: farm-ambiance 30s ease-in-out infinite;
             color: #333;
             min-height: 100vh;
+            position: relative;
+        }
+
+        /* Add floating elements for ambiance */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.6) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.4) 0%, transparent 30%),
+                radial-gradient(circle at 60% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 25%);
+            animation: clouds-drift 25s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
         }
 
         .screen {
@@ -252,6 +278,40 @@
                 padding: 8px 15px;
             }
         }
+
+        /* Farm-themed animations */
+        @keyframes clouds-drift {
+            0%, 100% { 
+                transform: translateX(0); 
+                opacity: 0.6;
+            }
+            50% { 
+                transform: translateX(30px); 
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes farm-ambiance {
+            0%, 100% { 
+                background-position: 0% 50%, 0% 100%, 100% 100%; 
+                filter: brightness(1);
+            }
+            50% { 
+                background-position: 100% 50%, 50% 100%, 0% 100%; 
+                filter: brightness(1.02);
+            }
+        }
+
+        @keyframes gentle-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Add some hover animations to menu buttons */
+        .menu-btn {
+            animation: gentle-bounce 3s ease-in-out infinite;
+            animation-delay: calc(var(--delay, 0) * 0.2s);
+        }
     </style>
 </head>
 <body>
@@ -260,11 +320,11 @@
         <div class="menu-container">
             <h1>🐄 Kiwi Dairy: Farm to Fortune</h1>
             <p style="margin-bottom: 30px; color: #666;">Build and manage your dairy farm empire in beautiful New Zealand!</p>
-            <button id="new-game-btn" class="menu-btn">🎮 New Game</button>
-            <button id="load-game-btn" class="menu-btn">💾 Load Game</button>
-            <button id="scenarios-btn" class="menu-btn">🗺️ Scenarios</button>
-            <button class="menu-btn">❓ Tutorial</button>
-            <button class="menu-btn">⚙️ Settings</button>
+            <button id="new-game-btn" class="menu-btn" style="--delay: 0">🎮 New Game</button>
+            <button id="load-game-btn" class="menu-btn" style="--delay: 1">💾 Load Game</button>
+            <button id="scenarios-btn" class="menu-btn" style="--delay: 2">🗺️ Scenarios</button>
+            <button class="menu-btn" style="--delay: 3">❓ Tutorial</button>
+            <button class="menu-btn" style="--delay: 4">⚙️ Settings</button>
         </div>
     </div>
 

@@ -199,8 +199,149 @@ export class FarmRenderer {
     }
 
     clearCanvas() {
-        this.ctx.fillStyle = '#E8F5E8';
+        // Create a beautiful sky gradient
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, '#87CEEB');    // Sky blue
+        gradient.addColorStop(0.3, '#98D8E8');  // Light blue
+        gradient.addColorStop(0.7, '#B0E0E6');  // Powder blue
+        gradient.addColorStop(1, '#c8e6c9');    // Light green
+        
+        this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Add rolling hills in the background
+        this.drawBackgroundHills();
+        
+        // Add weather effects
+        this.drawWeatherEffects();
+    }
+
+    drawBackgroundHills() {
+        // Distant mountains
+        this.ctx.fillStyle = 'rgba(46, 125, 50, 0.2)';
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, this.canvas.height * 0.4);
+        for (let x = 0; x <= this.canvas.width; x += 50) {
+            const y = this.canvas.height * 0.4 + Math.sin(x * 0.01) * 30;
+            this.ctx.lineTo(x, y);
+        }
+        this.ctx.lineTo(this.canvas.width, this.canvas.height);
+        this.ctx.lineTo(0, this.canvas.height);
+        this.ctx.closePath();
+        this.ctx.fill();
+        
+        // Rolling hills
+        this.ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, this.canvas.height * 0.6);
+        for (let x = 0; x <= this.canvas.width; x += 30) {
+            const y = this.canvas.height * 0.6 + Math.sin(x * 0.02 + Date.now() * 0.0001) * 20;
+            this.ctx.lineTo(x, y);
+        }
+        this.ctx.lineTo(this.canvas.width, this.canvas.height);
+        this.ctx.lineTo(0, this.canvas.height);
+        this.ctx.closePath();
+        this.ctx.fill();
+    }
+
+    drawWeatherEffects() {
+        const weather = this.game.systems.get('weather')?.getCurrentWeather();
+        if (!weather) return;
+
+        switch (weather.conditions) {
+            case 'rain':
+                this.drawRain();
+                break;
+            case 'sunny':
+                this.drawSunshine();
+                break;
+            case 'cloudy':
+                this.drawClouds();
+                break;
+            case 'windy':
+                this.drawWind();
+                break;
+        }
+    }
+
+    drawRain() {
+        this.ctx.strokeStyle = 'rgba(100, 150, 200, 0.6)';
+        this.ctx.lineWidth = 1;
+        
+        for (let i = 0; i < 50; i++) {
+            const x = Math.random() * this.canvas.width;
+            const y = (Date.now() * 0.01 + i * 50) % this.canvas.height;
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, y);
+            this.ctx.lineTo(x - 3, y + 15);
+            this.ctx.stroke();
+        }
+    }
+
+    drawSunshine() {
+        const sunX = this.canvas.width * 0.8;
+        const sunY = this.canvas.height * 0.2;
+        
+        // Sun rays
+        this.ctx.strokeStyle = 'rgba(255, 255, 0, 0.3)';
+        this.ctx.lineWidth = 2;
+        
+        for (let i = 0; i < 8; i++) {
+            const angle = (i * Math.PI / 4) + (Date.now() * 0.001);
+            this.ctx.beginPath();
+            this.ctx.moveTo(sunX, sunY);
+            this.ctx.lineTo(
+                sunX + Math.cos(angle) * 60,
+                sunY + Math.sin(angle) * 60
+            );
+            this.ctx.stroke();
+        }
+        
+        // Sun
+        this.ctx.fillStyle = 'rgba(255, 255, 0, 0.8)';
+        this.ctx.beginPath();
+        this.ctx.arc(sunX, sunY, 20, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+
+    drawClouds() {
+        const time = Date.now() * 0.0001;
+        
+        for (let i = 0; i < 3; i++) {
+            const x = (this.canvas.width * 0.2 * i + time * 20) % this.canvas.width;
+            const y = this.canvas.height * 0.15 + i * 30;
+            
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            
+            // Draw cloud
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, 25, 0, Math.PI * 2);
+            this.ctx.arc(x + 25, y, 35, 0, Math.PI * 2);
+            this.ctx.arc(x + 50, y, 25, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+    }
+
+    drawWind() {
+        this.ctx.strokeStyle = 'rgba(200, 200, 200, 0.4)';
+        this.ctx.lineWidth = 2;
+        
+        const time = Date.now() * 0.005;
+        
+        for (let i = 0; i < 5; i++) {
+            const y = this.canvas.height * 0.3 + i * 50;
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, y);
+            
+            for (let x = 0; x <= this.canvas.width; x += 20) {
+                const waveY = y + Math.sin(x * 0.02 + time + i) * 10;
+                this.ctx.lineTo(x, waveY);
+            }
+            
+            this.ctx.stroke();
+        }
     }
 
     drawGrid() {
@@ -287,26 +428,73 @@ export class FarmRenderer {
     }
 
     drawCattleInPasture(pasture, bounds) {
-        const cattleCount = Math.min(pasture.currentStock, 20); // Limit visual cattle
-        const cattleSize = 3 / this.zoom;
+        const cattleCount = Math.min(pasture.currentStock, 12); // Limit visual cattle
+        const cattleSize = Math.max(4, 8 / this.zoom);
+        const time = Date.now() * 0.001;
         
         for (let i = 0; i < cattleCount; i++) {
-            const x = bounds.x + 10 + (i % 5) * (bounds.width / 6);
-            const y = bounds.y + 30 + Math.floor(i / 5) * (bounds.height / 8);
+            // Add some random positioning for more natural look
+            const baseX = bounds.x + 15 + (i % 4) * (bounds.width / 5);
+            const baseY = bounds.y + 40 + Math.floor(i / 4) * (bounds.height / 4);
             
-            this.ctx.fillStyle = this.colors.cattle;
-            this.ctx.fillRect(x, y, cattleSize, cattleSize);
+            // Add gentle animation
+            const x = baseX + Math.sin(time + i) * 2;
+            const y = baseY + Math.cos(time * 0.7 + i) * 1;
+            
+            this.drawSingleCow(x, y, cattleSize, i);
         }
         
-        // Draw cattle count
+        // Draw cattle count with better styling
+        this.ctx.save();
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        this.ctx.fillRect(bounds.x + bounds.width - 50 / this.zoom, bounds.y + bounds.height - 20 / this.zoom, 45 / this.zoom, 15 / this.zoom);
+        
         this.ctx.fillStyle = '#000';
         this.ctx.font = `${10 / this.zoom}px Arial`;
-        this.ctx.textAlign = 'right';
+        this.ctx.textAlign = 'center';
         this.ctx.fillText(
-            `${pasture.currentStock}🐄`,
-            bounds.x + bounds.width - 5 / this.zoom,
-            bounds.y + bounds.height - 5 / this.zoom
+            `${pasture.currentStock} 🐄`,
+            bounds.x + bounds.width - 27 / this.zoom,
+            bounds.y + bounds.height - 8 / this.zoom
         );
+        this.ctx.restore();
+    }
+
+    drawSingleCow(x, y, size, index) {
+        this.ctx.save();
+        
+        // Cow body (oval)
+        this.ctx.fillStyle = index % 2 === 0 ? '#8D6E63' : '#5D4037'; // Vary cow colors
+        this.ctx.beginPath();
+        this.ctx.ellipse(x, y, size * 0.8, size * 0.6, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Cow head
+        this.ctx.fillStyle = index % 3 === 0 ? '#6D4C41' : '#4E342E';
+        this.ctx.beginPath();
+        this.ctx.arc(x - size * 0.6, y - size * 0.2, size * 0.4, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Cow spots (for some cows)
+        if (index % 2 === 0) {
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.beginPath();
+            this.ctx.arc(x - size * 0.2, y - size * 0.2, size * 0.15, 0, Math.PI * 2);
+            this.ctx.fill();
+            
+            this.ctx.beginPath();
+            this.ctx.arc(x + size * 0.3, y + size * 0.1, size * 0.12, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+        
+        // Legs
+        this.ctx.fillStyle = '#3E2723';
+        this.ctx.fillRect(x - size * 0.4, y + size * 0.4, size * 0.15, size * 0.3);
+        this.ctx.fillRect(x - size * 0.1, y + size * 0.4, size * 0.15, size * 0.3);
+        this.ctx.fillRect(x + size * 0.2, y + size * 0.4, size * 0.15, size * 0.3);
+        this.ctx.fillRect(x + size * 0.5, y + size * 0.4, size * 0.15, size * 0.3);
+        
+        this.ctx.restore();
     }
 
     drawPastureStatus(pasture, bounds) {

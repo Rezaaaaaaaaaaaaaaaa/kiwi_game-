@@ -1,0 +1,26 @@
+FREE BACKGROUND MUSIC SOURCES:
+
+1. INCOMPETECH (CC BY 3.0 - requires attribution)
+   - Go to: https://incompetech.com/music/royalty-free/music.html
+   - Search: "peaceful", "country", "rural"
+   - Recommended: "Country Boy", "Fretless", "Wholesome"
+   - Download MP3, rename to: peaceful-farm.mp3
+
+2. OPENGAMEART.ORG (CC0)
+   - Go to: https://opengameart.org/art-search?keys=music
+   - Filter by CC0 license
+   - Look for calm, ambient music
+
+3. YOUTUBE AUDIO LIBRARY (Free)
+   - Go to YouTube Studio > Audio Library
+   - Filter by "Country" or "Ambient"
+   - Free for any use
+
+4. QUICK TESTING SOLUTION:
+   - Use any calm instrumental music you have
+   - Lower the volume to 20-30%
+   - Loop the track
+
+RENAME TO: peaceful-farm.mp3 and place in this folder
+
+ATTRIBUTION: If using Incompetech, add "Music by Kevin MacLeod" to your credits

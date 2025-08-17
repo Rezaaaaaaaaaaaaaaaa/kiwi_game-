@@ -4,8 +4,20 @@
       "Bash(npm start)",
       "Bash(python:*)",
       "Bash(cp:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "WebSearch",
+      "Bash(mkdir:*)",
+      "Bash(md:*)",
+      "Bash(md \"src\\assets\\images\\sprites\")",
+      "Bash(md \"src\\assets\\audio\\sfx\")",
+      "Bash(md \"src\\assets\\audio\\music\")",
+      "WebFetch(domain:mixkit.co)",
+      "WebFetch(domain:pixabay.com)",
+      "WebFetch(domain:freesound.org)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "C:\\c\\Game\\Kiwi farm"
+    ]
   }
 }

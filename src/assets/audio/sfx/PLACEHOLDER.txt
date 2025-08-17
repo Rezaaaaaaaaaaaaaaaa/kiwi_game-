@@ -1,0 +1,26 @@
+Placeholder for sound effects files.
+
+To add real audio:
+1. Download free sound effects from sources listed in AUDIO_SOURCES.md
+2. Name them according to AudioManager.js expectations:
+   - cow-moo.mp3
+   - cow-moo-2.mp3
+   - milking.mp3
+   - tractor.mp3
+   - ui-click.mp3
+   - ui-hover.mp3
+   - success.mp3
+   - error.mp3
+   - warning.mp3
+   - wind.mp3
+   - rain.mp3
+   - thunder.mp3
+   - birds.mp3
+   - machinery-start.mp3
+   - machinery-stop.mp3
+   - feeding.mp3
+   - level-up.mp3
+   - achievement.mp3
+   - milestone.mp3
+
+3. Replace this placeholder file

@@ -1,0 +1,18 @@
+FREE UI CLICK SOUND SOURCES:
+
+1. MIXKIT (Royalty-free)
+   - Go to: https://mixkit.co/free-sound-effects/interface/
+   - "Select click" - https://mixkit.co/free-sound-effects/interface/
+   - "Cool interface click tone"
+   - Direct download, rename to: ui-click.mp3
+
+2. FREESOUND.ORG (CC0)
+   - Search: "button click CC0"
+   - Many free options available
+
+3. SIMPLE SOLUTION FOR TESTING:
+   - Record yourself making a "click" sound
+   - Use online TTS to generate a short beep
+   - Use any short "pop" or "click" sound from your computer
+
+RENAME TO: ui-click.mp3 and place in this folder

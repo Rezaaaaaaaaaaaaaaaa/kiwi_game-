@@ -87,10 +87,54 @@
     flex: 1;
     position: relative;
     background: 
-        radial-gradient(circle at 20% 80%, rgba(129, 199, 132, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(102, 187, 106, 0.3) 0%, transparent 50%),
-        linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+        /* Sky and clouds */
+        linear-gradient(to bottom, #87CEEB 0%, #98D8E8 30%, #B0E0E6 60%, #c8e6c9 100%),
+        /* Rolling hills */
+        radial-gradient(ellipse at 20% 100%, rgba(76, 175, 80, 0.4) 0%, transparent 70%),
+        radial-gradient(ellipse at 80% 100%, rgba(129, 199, 132, 0.4) 0%, transparent 70%),
+        /* Distant mountains */
+        radial-gradient(ellipse at 50% 100%, rgba(46, 125, 50, 0.2) 0%, transparent 50%);
     overflow: hidden;
+}
+
+/* Add animated clouds */
+#farm-view::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: 
+        radial-gradient(ellipse at 20% 20%, rgba(255, 255, 255, 0.8) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 10%, rgba(255, 255, 255, 0.6) 0%, transparent 40%),
+        radial-gradient(ellipse at 90% 25%, rgba(255, 255, 255, 0.7) 0%, transparent 45%);
+    animation: clouds-drift 20s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Add grass texture */
+#farm-view::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30%;
+    background: 
+        repeating-linear-gradient(90deg,
+            rgba(76, 175, 80, 0.1) 0px,
+            rgba(76, 175, 80, 0.05) 2px,
+            transparent 4px,
+            transparent 8px
+        ),
+        repeating-linear-gradient(0deg,
+            rgba(129, 199, 132, 0.1) 0px,
+            rgba(129, 199, 132, 0.05) 1px,
+            transparent 2px,
+            transparent 4px
+        );
+    pointer-events: none;
 }
 
 #farm-canvas {
@@ -443,6 +487,34 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+@keyframes clouds-drift {
+    0%, 100% { 
+        transform: translateX(0); 
+        opacity: 0.8;
+    }
+    50% { 
+        transform: translateX(20px); 
+        opacity: 1;
+    }
+}
+
+@keyframes gentle-sway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(2px) rotate(1deg); }
+    75% { transform: translateX(-2px) rotate(-1deg); }
+}
+
+@keyframes farm-ambiance {
+    0%, 100% { 
+        background-position: 0% 50%; 
+        filter: brightness(1);
+    }
+    50% { 
+        background-position: 100% 50%; 
+        filter: brightness(1.05);
+    }
 }
 
 /* Scenario Cards */

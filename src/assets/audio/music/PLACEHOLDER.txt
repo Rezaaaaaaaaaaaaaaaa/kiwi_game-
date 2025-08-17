@@ -1,0 +1,21 @@
+Placeholder for background music files.
+
+To add real music:
+1. Download free music from sources listed in AUDIO_SOURCES.md
+2. Name them according to AudioManager.js expectations:
+   - main-theme.mp3
+   - peaceful-farm.mp3
+   - busy-day.mp3
+   - rain-theme.mp3
+   - victory.mp3
+   - menu-theme.mp3
+
+3. Replace this placeholder file
+
+Recommended music styles:
+- peaceful-farm.mp3: Gentle, ambient countryside music
+- busy-day.mp3: Slightly more upbeat farm work music
+- rain-theme.mp3: Calm, gentle rain atmosphere
+- main-theme.mp3: Memorable farm theme song
+- menu-theme.mp3: Light, welcoming menu music
+- victory.mp3: Celebratory achievement music

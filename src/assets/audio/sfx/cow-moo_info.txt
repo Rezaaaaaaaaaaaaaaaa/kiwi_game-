@@ -1,0 +1,23 @@
+FREE COW MOO SOUND SOURCES:
+
+1. FREESOUND.ORG (CC0 License)
+   - Search: "cow moo CC0"
+   - Direct links (after free registration):
+   - https://freesound.org/s/316847/ - Cow Moo by rileymoore2003
+   - https://freesound.org/s/383236/ - Cow 2 by Aiden.Bogart
+   - Download as MP3, rename to: cow-moo.mp3
+
+2. PIXABAY (No attribution required)
+   - Search: "cow sound effect"
+   - Direct download available
+   - Convert to MP3 if needed
+
+3. QUICK DOWNLOAD INSTRUCTIONS:
+   a) Go to freesound.org
+   b) Create free account (30 seconds)
+   c) Search "cow moo"
+   d) Filter by "CC0" license
+   e) Download and rename to cow-moo.mp3
+   f) Place in this folder
+
+ALTERNATIVE: Use text-to-speech to say "moo" and save as MP3 for testing!
