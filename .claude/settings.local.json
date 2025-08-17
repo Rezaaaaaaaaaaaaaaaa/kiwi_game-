@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npm start)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(cp:*)",
+      "Bash(git add:*)"
     ],
     "defaultMode": "acceptEdits"
   }
