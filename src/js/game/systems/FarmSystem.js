@@ -17,12 +17,16 @@ export class FarmSystem extends BaseSystem {
 
     async init() {
         await super.init();
-        this.setupBuildings();
-        this.calculateMaintenanceCosts();
+        // Don't setup buildings during system initialization
+        // They will be setup when a game starts
     }
 
     setupBuildings() {
         const farm = this.game.farm;
+        if (!farm) {
+            console.log('No farm available yet, skipping building setup');
+            return;
+        }
 
         this.buildings.set('milking-shed', {
             type: farm.infrastructure.milkingShed,
@@ -35,8 +39,14 @@ export class FarmSystem extends BaseSystem {
             type: 'silo',
             capacity: farm.infrastructure.storage,
             condition: 100,
-            currentStock: this.game.resources.feed
+            currentStock: this.game.resources?.feed || 0
         });
+    }
+
+    start() {
+        super.start();
+        this.setupBuildings();
+        this.calculateMaintenanceCosts();
     }
 
     getMilkingCapacity(shedType) {
@@ -105,8 +115,12 @@ export class FarmSystem extends BaseSystem {
 
     calculateMaintenanceCosts() {
         const farm = this.game.farm;
+        if (!farm) {
+            this.maintenanceCosts = 0;
+            return;
+        }
+        
         let dailyCost = 0;
-
         dailyCost += farm.size * 2;
 
         for (const [id, building] of this.buildings) {

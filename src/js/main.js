@@ -32,38 +32,67 @@ class KiwiDairyGame {
 
             this.initialized = true;
             console.log('Game initialized successfully!');
+            console.log('UI Manager:', this.uiManager);
+            console.log('Game instance:', this.game);
 
         } catch (error) {
             console.error('Failed to initialize game:', error);
+            console.error('Error details:', error.stack);
             this.showError('Failed to load game. Please refresh the page.');
         }
     }
 
     setupEventListeners() {
         // Menu button event listeners
-        document.getElementById('new-game-btn').addEventListener('click', () => {
-            this.uiManager.showScreen('scenario-select');
-        });
+        const newGameBtn = document.getElementById('new-game-btn');
+        if (newGameBtn) {
+            newGameBtn.addEventListener('click', () => {
+                console.log('New Game button clicked');
+                this.uiManager.showScreen('scenario-select');
+            });
+        } else {
+            console.error('New Game button not found');
+        }
 
-        document.getElementById('load-game-btn').addEventListener('click', () => {
-            this.loadGame();
-        });
+        const loadGameBtn = document.getElementById('load-game-btn');
+        if (loadGameBtn) {
+            loadGameBtn.addEventListener('click', () => {
+                console.log('Load Game button clicked');
+                this.loadGame();
+            });
+        }
 
-        document.getElementById('scenarios-btn').addEventListener('click', () => {
-            this.uiManager.showScreen('scenario-select');
-        });
+        const scenariosBtn = document.getElementById('scenarios-btn');
+        if (scenariosBtn) {
+            scenariosBtn.addEventListener('click', () => {
+                console.log('Scenarios button clicked');
+                this.uiManager.showScreen('scenario-select');
+            });
+        }
 
-        document.getElementById('tutorial-btn').addEventListener('click', () => {
-            this.showTutorialMenu();
-        });
+        const tutorialBtn = document.getElementById('tutorial-btn');
+        if (tutorialBtn) {
+            tutorialBtn.addEventListener('click', () => {
+                console.log('Tutorial button clicked');
+                this.showTutorialMenu();
+            });
+        }
 
-        document.getElementById('settings-btn').addEventListener('click', () => {
-            this.showSettings();
-        });
+        const settingsBtn = document.getElementById('settings-btn');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                console.log('Settings button clicked');
+                this.showSettings();
+            });
+        }
 
-        document.getElementById('back-to-menu').addEventListener('click', () => {
-            this.uiManager.showScreen('menu');
-        });
+        const backToMenuBtn = document.getElementById('back-to-menu');
+        if (backToMenuBtn) {
+            backToMenuBtn.addEventListener('click', () => {
+                console.log('Back to menu clicked');
+                this.uiManager.showScreen('menu');
+            });
+        }
 
         // Game controls
         document.getElementById('pause-btn')?.addEventListener('click', () => {

@@ -28,12 +28,16 @@ export class Game {
         const { WeatherSystem } = await import('./systems/WeatherSystem.js');
         const { MarketSystem } = await import('./systems/MarketSystem.js');
         const { TimeSystem } = await import('./systems/TimeSystem.js');
+        const { TechnologySystem } = await import('./systems/TechnologySystem.js');
+        const { StatisticsSystem } = await import('./systems/StatisticsSystem.js');
 
         this.systems.set('farm', new FarmSystem(this));
         this.systems.set('cattle', new CattleSystem(this));
         this.systems.set('weather', new WeatherSystem(this));
         this.systems.set('market', new MarketSystem(this));
         this.systems.set('time', new TimeSystem(this));
+        this.systems.set('technology', new TechnologySystem(this));
+        this.systems.set('statistics', new StatisticsSystem(this));
 
         // Initialize all systems
         for (const [name, system] of this.systems) {
@@ -56,6 +60,11 @@ export class Game {
         const { TutorialManager } = await import('./TutorialManager.js');
         this.tutorialManager = new TutorialManager(this, this.uiManager);
 
+        // Initialize scenario manager
+        const { ScenarioManager } = await import('./scenarios/ScenarioManager.js');
+        this.scenarioManager = new ScenarioManager(this);
+        this.scenarioManager.init();
+
         // Start menu music
         this.audioManager.playMusic('menu-theme');
     }
@@ -69,6 +78,11 @@ export class Game {
 
             // Initialize game state
             this.initializeGameState();
+
+            // Set scenario in scenario manager
+            if (this.scenarioManager) {
+                this.scenarioManager.setScenario(this.currentScenario);
+            }
 
             // Start systems
             for (const system of this.systems.values()) {
@@ -241,8 +255,14 @@ export class Game {
             case 'tech-tree':
                 this.showTechTree();
                 break;
+            case 'research':
+                this.showResearch();
+                break;
             case 'achievements':
                 this.showAchievements();
+                break;
+            case 'statistics':
+                this.showStatistics();
                 break;
             case 'leaderboard':
                 this.showLeaderboard();
@@ -256,23 +276,107 @@ export class Game {
     }
 
     showAchievements() {
-        // Achievements modal content
-        const achievements = [
-            { name: 'First Milking', unlocked: this.resources.milk > 0 },
-            { name: '100 Cows', unlocked: this.systems.get('cattle')?.cattle.length >= 100 },
-            { name: 'Environmental Award', unlocked: false },
-            { name: 'Survive Winter', unlocked: this.gameTime.season === 'winter' && this.gameTime.day > 90 },
-            { name: 'Tech Pioneer', unlocked: this.farm.infrastructure.milkingShed === 'robotic' }
-        ];
-        let content = `<div class='achievement-list'>`;
-        achievements.forEach(a => {
-            content += `<div class='achievement-item ${a.unlocked ? 'unlocked' : ''}'>
-                <strong>${a.name}</strong>
-                <span>${a.unlocked ? 'Unlocked' : 'Locked'}</span>
+        const statsSystem = this.systems.get('statistics');
+        if (!statsSystem) return;
+
+        const achievements = Array.from(statsSystem.achievements.values());
+        const milestones = Array.from(statsSystem.milestones.values());
+        
+        let content = `<div class='achievements-container'>
+            <div class='achievements-section'>
+                <h4>Achievements</h4>
+                <div class='achievement-list'>`;
+        
+        achievements.forEach(achievement => {
+            content += `<div class='achievement-item ${achievement.unlocked ? 'unlocked' : 'locked'}'>
+                <div class='achievement-icon'>${achievement.unlocked ? '🏆' : '🔒'}</div>
+                <div class='achievement-info'>
+                    <strong>${achievement.name}</strong>
+                    <p>${achievement.description}</p>
+                    ${achievement.unlocked ? `<span class='unlock-date'>Unlocked: ${achievement.unlockedDate?.toDateString()}</span>` : ''}
+                </div>
             </div>`;
         });
-        content += `</div>`;
-        this.uiManager.showModal(content, 'Achievements');
+        
+        content += `</div></div>
+            <div class='milestones-section'>
+                <h4>Milestones</h4>
+                <div class='milestone-list'>`;
+        
+        milestones.forEach(milestone => {
+            const currentLevel = milestone.currentLevel;
+            const nextThreshold = milestone.thresholds[currentLevel];
+            const stats = statsSystem.getCurrentStats();
+            const currentValue = milestone.getValue(stats);
+            
+            content += `<div class='milestone-item'>
+                <strong>${milestone.name}</strong>
+                <div class='milestone-progress'>
+                    <span>Current: ${currentValue.toLocaleString()}</span>
+                    ${nextThreshold ? `<span>Next: ${nextThreshold.toLocaleString()}</span>` : '<span>Completed!</span>'}
+                </div>
+                <div class='milestone-level'>Level ${currentLevel}/${milestone.thresholds.length}</div>
+            </div>`;
+        });
+        
+        content += `</div></div></div>`;
+        this.uiManager.showModal(content, 'Achievements & Milestones');
+    }
+
+    showStatistics() {
+        const statsSystem = this.systems.get('statistics');
+        if (!statsSystem) return;
+
+        const currentStats = statsSystem.getCurrentStats();
+        const analytics = {
+            production: statsSystem.getAnalytics('production', 30),
+            financial: statsSystem.getAnalytics('financial', 30),
+            efficiency: statsSystem.getAnalytics('efficiency', 30)
+        };
+        
+        let content = `<div class='statistics-container'>
+            <div class='stats-overview'>
+                <h4>Farm Overview</h4>
+                <div class='stat-grid'>
+                    <div class='stat-item'>
+                        <span class='stat-label'>Total Milk Produced</span>
+                        <span class='stat-value'>${currentStats.totalMilkProduced.toLocaleString()}L</span>
+                    </div>
+                    <div class='stat-item'>
+                        <span class='stat-label'>Current Cattle</span>
+                        <span class='stat-value'>${currentStats.currentCattle}</span>
+                    </div>
+                    <div class='stat-item'>
+                        <span class='stat-label'>Total Profit</span>
+                        <span class='stat-value'>$${currentStats.totalProfit.toLocaleString()}</span>
+                    </div>
+                    <div class='stat-item'>
+                        <span class='stat-label'>Farm Value</span>
+                        <span class='stat-value'>$${currentStats.farmValue.toLocaleString()}</span>
+                    </div>
+                    <div class='stat-item'>
+                        <span class='stat-label'>Average Efficiency</span>
+                        <span class='stat-value'>${currentStats.averageEfficiency.toFixed(1)}%</span>
+                    </div>
+                    <div class='stat-item'>
+                        <span class='stat-label'>Technologies Unlocked</span>
+                        <span class='stat-value'>${currentStats.technologiesUnlocked}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class='stats-charts'>
+                <h4>Performance Trends (Last 30 Days)</h4>
+                <div class='chart-placeholder'>
+                    <p>Production: ${analytics.production.length} data points</p>
+                    <p>Financial: ${analytics.financial.length} data points</p>
+                    <p>Efficiency: ${analytics.efficiency.length} data points</p>
+                    <small>Chart visualization would go here</small>
+                </div>
+            </div>
+        </div>`;
+        
+        this.uiManager.showModal(content, 'Farm Statistics');
     }
 
     showMultiplayer() {
@@ -295,25 +399,87 @@ export class Game {
         this.uiManager.showModal(content, 'Leaderboard');
     }
     showTechTree() {
-        // Technology tree modal content
-        const techs = [
-            { name: 'Herringbone Shed', unlocked: this.farm.infrastructure.milkingShed === 'herringbone' },
-            { name: 'Rotary Shed', unlocked: this.farm.infrastructure.milkingShed === 'rotary' },
-            { name: 'Robotic Shed', unlocked: this.farm.infrastructure.milkingShed === 'robotic' },
-            { name: 'Precision Feeding', unlocked: false },
-            { name: 'Genomic Selection', unlocked: false },
-            { name: 'Activity Monitors', unlocked: false },
-            { name: 'Organic Certification', unlocked: false }
-        ];
-        let content = `<div class='tech-tree-list'>`;
-        techs.forEach(tech => {
-            content += `<div class='tech-tree-item ${tech.unlocked ? 'unlocked' : ''}'>
-                <strong>${tech.name}</strong>
-                <span>${tech.unlocked ? 'Unlocked' : 'Locked'}</span>
-            </div>`;
+        const techSystem = this.systems.get('technology');
+        if (!techSystem) return;
+
+        const technologyTree = techSystem.getTechnologyTree();
+        let content = `<div class='tech-tree-container'>`;
+        
+        Object.entries(technologyTree).forEach(([category, techs]) => {
+            content += `<div class='tech-category'>
+                <h4>${category.charAt(0).toUpperCase() + category.slice(1)}</h4>
+                <div class='tech-list'>`;
+            
+            techs.forEach(tech => {
+                const statusClass = tech.unlocked ? 'unlocked' : tech.canResearch ? 'available' : 'locked';
+                const costDisplay = tech.unlocked ? `$${tech.cost.toLocaleString()}` : `${tech.researchCost} RP`;
+                
+                content += `<div class='tech-item ${statusClass}' data-tech='${tech.id}'>
+                    <strong>${tech.name}</strong>
+                    <p>${tech.description}</p>
+                    <span class='tech-cost'>${costDisplay}</span>
+                    <button class='tech-btn' ${!tech.canResearch || tech.unlocked ? 'disabled' : ''}>
+                        ${tech.unlocked ? (tech.isPurchased ? 'Purchased' : 'Purchase') : 'Research'}
+                    </button>
+                </div>`;
+            });
+            
+            content += `</div></div>`;
         });
+        
         content += `</div>`;
-        this.uiManager.showModal(content, 'Technology Tree & Unlockables');
+        this.uiManager.showModal(content, 'Technology Tree');
+    }
+
+    showResearch() {
+        const techSystem = this.systems.get('technology');
+        if (!techSystem) return;
+
+        const currentResearch = techSystem.getResearchProgress();
+        const researchPoints = techSystem.researchPoints;
+        
+        let content = `<div class='research-container'>
+            <div class='research-points'>
+                <h4>Research Points: ${researchPoints.toFixed(1)}</h4>
+            </div>`;
+        
+        if (currentResearch) {
+            content += `<div class='current-research'>
+                <h4>Current Research</h4>
+                <div class='research-item'>
+                    <strong>${currentResearch.technology.name}</strong>
+                    <div class='progress-bar'>
+                        <div class='progress-fill' style='width: ${currentResearch.percentage}%'></div>
+                    </div>
+                    <span>${currentResearch.percentage.toFixed(1)}% Complete</span>
+                </div>
+            </div>`;
+        }
+        
+        // Available research options
+        const availableTechs = Array.from(techSystem.technologies.values())
+            .filter(tech => !tech.unlocked && techSystem.canResearch(tech.id));
+        
+        if (availableTechs.length > 0) {
+            content += `<div class='available-research'>
+                <h4>Available Research</h4>`;
+            
+            availableTechs.forEach(tech => {
+                content += `<div class='research-option' data-tech='${tech.id}'>
+                    <strong>${tech.name}</strong>
+                    <p>${tech.description}</p>
+                    <span>Cost: ${tech.researchCost} RP</span>
+                    <button class='research-btn' ${researchPoints < tech.researchCost ? 'disabled' : ''}>
+                        Start Research
+                    </button>
+                </div>`;
+            });
+            
+            content += `</div>`;
+        }
+        
+        content += `</div>`;
+        this.uiManager.showModal(content, 'Research Laboratory');
     }
 
     showPastureManagement() {

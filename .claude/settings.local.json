@@ -1,8 +1,9 @@
 {
   "permissions": {
-    "defaultMode": "acceptEdits",
     "allow": [
-      "Bash(npm start)"
-    ]
+      "Bash(npm start)",
+      "Bash(python:*)"
+    ],
+    "defaultMode": "acceptEdits"
   }
 }

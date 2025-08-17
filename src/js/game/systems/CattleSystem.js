@@ -26,6 +26,11 @@ export class CattleSystem extends BaseSystem {
     async init() {
         await super.init();
         this.setupBreeds();
+        // Don't initialize cattle during system init - do it when game starts
+    }
+
+    start() {
+        super.start();
         this.initializeCattle();
     }
 
@@ -66,7 +71,10 @@ export class CattleSystem extends BaseSystem {
 
     initializeCattle() {
         const scenario = this.game.currentScenario;
-        if (!scenario || scenario.startingCattle === 0) return;
+        if (!scenario || scenario.startingCattle === 0) {
+            console.log('No scenario or starting cattle, skipping cattle initialization');
+            return;
+        }
 
         const defaultBreed = this.breeds.get('friesian');
 
@@ -79,270 +87,129 @@ export class CattleSystem extends BaseSystem {
 
     createCow(breed, breedId) {
         return {
-            id: this.cattle.length + 1,
-            breed: breedId,
-            breedData: breed,
-            age: 2 + Math.random() * 6, // 2-8 years
-            health: 90 + Math.random() * 10,
-            weight: 400 + Math.random() * 100,
-            pregnant: Math.random() < 0.6,
+            id: Date.now() + Math.random(),
+            breedId: breedId,
+            breed: breed.name,
+            age: 24 + Math.random() * 36, // 2-5 years old
+            health: 85 + Math.random() * 15,
             lactating: Math.random() < 0.8,
+            pregnant: Math.random() < 0.3,
             milkYield: breed.milkYield * (0.8 + Math.random() * 0.4),
+            feedRequirement: breed.feedRequirement,
+            lastMilking: 0,
             daysInMilk: Math.floor(Math.random() * 300),
-            lastCalving: Date.now() - (Math.random() * 365 * 24 * 60 * 60 * 1000),
             pastureId: null,
-            feedStatus: 'good',
-            temperament: breed.temperament
+            temperament: breed.temperament,
+            weight: 450 + Math.random() * 150
         };
     }
 
     distributeCattleToPastures() {
-        const pastures = this.game.farm.pastures;
-        if (!pastures.length) return;
+        const farm = this.game.farm;
+        if (!farm || !farm.pastures) return;
 
-        let pastureIndex = 0;
-
+        const availablePastures = farm.pastures.filter(p => p.currentStock < p.maxStock);
+        
         this.cattle.forEach(cow => {
-            const pasture = pastures[pastureIndex];
-            if (pasture.currentStock < pasture.maxStock) {
-                pasture.currentStock++;
-                cow.pastureId = pasture.id;
-            } else {
-                pastureIndex = (pastureIndex + 1) % pastures.length;
-                const nextPasture = pastures[pastureIndex];
-                if (nextPasture.currentStock < nextPasture.maxStock) {
-                    nextPasture.currentStock++;
-                    cow.pastureId = nextPasture.id;
+            if (availablePastures.length > 0) {
+                const pasture = availablePastures[Math.floor(Math.random() * availablePastures.length)];
+                if (pasture.currentStock < pasture.maxStock) {
+                    cow.pastureId = pasture.id;
+                    pasture.currentStock++;
                 }
             }
         });
     }
 
-    update(deltaTime) {
-        super.update(deltaTime);
-
-        const currentHour = this.game.gameTime.hour;
-
-        if (currentHour !== this.lastMilking && (currentHour === 6 || currentHour === 16)) {
-            this.milkCows();
-            this.lastMilking = currentHour;
+    feedCattle() {
+        const feedRequired = this.cattle.length * 15; // 15kg per cow average
+        
+        if (this.game.resources.feed >= feedRequired) {
+            this.game.resources.feed -= feedRequired;
+            this.cattle.forEach(cow => {
+                cow.health = Math.min(100, cow.health + 2);
+                cow.lastFeeding = Date.now();
+            });
+            this.game.uiManager?.showNotification(`Fed ${this.cattle.length} cattle`, 'success');
+        } else {
+            this.game.uiManager?.showNotification('Not enough feed!', 'error');
         }
-
-        if (currentHour !== this.lastFeeding && currentHour === 7) {
-            this.feedCattle();
-            this.lastFeeding = currentHour;
-        }
-
-        this.updateCattleHealth();
-        this.calculateProduction();
-        this.manageBreedingl();
     }
 
     milkCows() {
         let totalMilk = 0;
-        const milkingShed = this.game.systems.get('farm')?.buildings?.get('milking-shed');
-        const maxCapacity = milkingShed?.capacity || 100;
-
-        const milkingCows = this.cattle
-            .filter(cow => cow.lactating && cow.health > 50)
-            .slice(0, maxCapacity);
-
-        milkingCows.forEach(cow => {
-            if (cow.lactating && cow.daysInMilk < 305) {
-                let milkYield = cow.milkYield;
-
-                milkYield *= (cow.health / 100);
-                milkYield *= this.getLactationCurve(cow.daysInMilk);
-
-                if (cow.feedStatus === 'poor') milkYield *= 0.7;
-                if (cow.feedStatus === 'excellent') milkYield *= 1.1;
-
-                totalMilk += milkYield;
-                cow.daysInMilk++;
-
-                if (cow.daysInMilk >= 305) {
-                    cow.lactating = false;
-                    cow.daysInMilk = 0;
-                }
-            }
+        const lactatingCows = this.cattle.filter(cow => cow.lactating && cow.health > 50);
+        
+        lactatingCows.forEach(cow => {
+            const milk = cow.milkYield * (cow.health / 100) * (0.8 + Math.random() * 0.4);
+            totalMilk += milk;
+            cow.lastMilking = Date.now();
         });
 
         this.game.resources.milk += totalMilk;
         this.milkProduction = totalMilk;
-
-        if (milkingCows.length > 0) {
-            this.game.uiManager.showNotification(
-                `Milked ${milkingCows.length} cows, produced ${Math.round(totalMilk)}L`,
-                'success'
-            );
-        }
+        
+        this.game.uiManager?.showNotification(`Milked ${lactatingCows.length} cows: ${totalMilk.toFixed(1)}L`, 'success');
     }
 
-    getLactationCurve(daysInMilk) {
-        if (daysInMilk < 50) {
-            return 0.6 + (daysInMilk / 50) * 0.4;
-        } else if (daysInMilk < 100) {
-            return 1.0;
-        } else if (daysInMilk < 200) {
-            return 1.0 - ((daysInMilk - 100) / 100) * 0.3;
-        } else {
-            return 0.7 - ((daysInMilk - 200) / 105) * 0.5;
+    buyCattle(breedId, quantity) {
+        const breed = this.breeds.get(breedId);
+        if (!breed) return false;
+
+        const totalCost = breed.cost * quantity;
+        if (this.game.resources.cash < totalCost) {
+            this.game.uiManager?.showNotification('Not enough cash!', 'error');
+            return false;
         }
+
+        this.game.resources.cash -= totalCost;
+        
+        for (let i = 0; i < quantity; i++) {
+            this.cattle.push(this.createCow(breed, breedId));
+        }
+
+        this.distributeCattleToPastures();
+        return true;
     }
 
-    feedCattle() {
-        const totalFeedRequired = this.cattle.reduce((total, cow) => {
-            return total + cow.breedData.feedRequirement;
-        }, 0);
-
-        if (this.game.resources.feed >= totalFeedRequired) {
-            this.game.resources.feed -= totalFeedRequired;
-            this.feedConsumption = totalFeedRequired;
-
-            this.cattle.forEach(cow => {
-                cow.feedStatus = 'good';
-                cow.health = Math.min(100, cow.health + 2);
-            });
-
-            this.game.uiManager.showNotification(
-                `Fed ${this.cattle.length} cattle (${Math.round(totalFeedRequired)}kg feed)`,
-                'success'
-            );
-        } else {
-            this.cattle.forEach(cow => {
-                cow.feedStatus = 'poor';
-                cow.health = Math.max(0, cow.health - 5);
-            });
-
-            this.game.uiManager.showNotification(
-                'Insufficient feed! Cattle health declining.',
-                'warning'
-            );
+    update(deltaTime) {
+        super.update(deltaTime);
+        
+        // Update cattle health and production
+        if (this.cattle.length > 0) {
+            this.updateCattleHealth();
+            this.calculateProduction();
         }
     }
 
     updateCattleHealth() {
         let totalHealth = 0;
-
+        
         this.cattle.forEach(cow => {
-            const pasture = this.game.farm.pastures.find(p => p.id === cow.pastureId);
-
-            if (pasture) {
-                if (pasture.grassLevel < 20) {
-                    cow.health = Math.max(0, cow.health - 1);
-                } else if (pasture.grassLevel > 80) {
-                    cow.health = Math.min(100, cow.health + 0.5);
-                }
+            // Slowly regenerate health if well fed
+            if (cow.health < 100) {
+                cow.health = Math.min(100, cow.health + 0.1);
             }
-
-            const weather = this.game.systems.get('weather')?.getCurrentWeather();
-            if (weather) {
-                if (weather.temperature < 0 || weather.temperature > 30) {
-                    cow.health = Math.max(0, cow.health - 0.5);
-                }
-            }
-
-            if (Math.random() < 0.001) {
-                cow.health = Math.max(0, cow.health - 20);
-                this.game.uiManager.showNotification(
-                    `Cow #${cow.id} has fallen ill!`,
-                    'warning'
-                );
-            }
-
             totalHealth += cow.health;
         });
-
+        
         this.averageHealth = this.cattle.length > 0 ? totalHealth / this.cattle.length : 100;
-    }
-
-    manageBreedingl() {
-        this.cattle.forEach(cow => {
-            if (!cow.pregnant && !cow.lactating && Math.random() < 0.002) {
-                cow.pregnant = true;
-                cow.gestationDays = 0;
-            }
-
-            if (cow.pregnant) {
-                cow.gestationDays = (cow.gestationDays || 0) + 1;
-
-                if (cow.gestationDays >= 280) {
-                    cow.pregnant = false;
-                    cow.lactating = true;
-                    cow.daysInMilk = 0;
-                    cow.gestationDays = 0;
-                    cow.lastCalving = Date.now();
-
-                    if (Math.random() < 0.5) {
-                        const calf = this.createCow(cow.breedData, cow.breed);
-                        calf.age = 0;
-                        calf.lactating = false;
-                        this.cattle.push(calf);
-
-                        this.game.uiManager.showNotification(
-                            `Cow #${cow.id} has given birth to a calf!`,
-                            'success'
-                        );
-                    }
-                }
-            }
-        });
     }
 
     calculateProduction() {
         this.milkProduction = this.cattle.reduce((total, cow) => {
-            return total + (cow.lactating ? cow.milkYield : 0);
+            return total + (cow.lactating ? cow.milkYield * (cow.health / 100) : 0);
         }, 0);
     }
 
-    buyCattle(breedId, quantity = 1) {
-        const breed = this.breeds.get(breedId);
-        if (!breed) {
-            throw new Error(`Unknown breed: ${breedId}`);
-        }
-
-        const totalCost = breed.cost * quantity;
-        if (this.game.resources.cash < totalCost) {
-            throw new Error('Insufficient funds to purchase cattle');
-        }
-
-        this.game.resources.cash -= totalCost;
-
-        for (let i = 0; i < quantity; i++) {
-            const cow = this.createCow(breed, breedId);
-            this.cattle.push(cow);
-        }
-
-        this.distributeCattleToPastures();
-
-        this.game.uiManager.showNotification(
-            `Purchased ${quantity} ${breed.name} cattle for $${totalCost}`,
-            'success'
-        );
+    getDailyFeedConsumption() {
+        return this.cattle.reduce((total, cow) => total + cow.feedRequirement, 0);
     }
 
-    sellCattle(cowId) {
-        const cowIndex = this.cattle.findIndex(cow => cow.id === cowId);
-        if (cowIndex === -1) {
-            throw new Error('Cow not found');
-        }
-
-        const cow = this.cattle[cowIndex];
-        const salePrice = cow.breedData.cost * 0.7; // 70% of purchase price
-
-        this.game.resources.cash += salePrice;
-
-        const pasture = this.game.farm.pastures.find(p => p.id === cow.pastureId);
-        if (pasture) {
-            pasture.currentStock--;
-        }
-
-        this.cattle.splice(cowIndex, 1);
-
-        this.game.uiManager.showNotification(
-            `Sold cow #${cowId} for $${salePrice}`,
-            'success'
-        );
+    adjustHealthMultiplier(multiplier) {
+        this.cattle.forEach(cow => {
+            cow.health = Math.max(0, Math.min(100, cow.health * multiplier));
+        });
     }
 
     getState() {
@@ -356,19 +223,13 @@ export class CattleSystem extends BaseSystem {
             diseaseRisk: this.diseaseRisk,
             totalCows: this.cattle.length,
             milkingCows: this.cattle.filter(c => c.lactating).length,
-            feedStatus: this.calculateFeedStatus()
+            feedStatus: this.getFeedStatus()
         };
     }
 
-    calculateFeedStatus() {
+    getFeedStatus() {
         if (this.cattle.length === 0) return 'Good';
-
-        const poorFeedCount = this.cattle.filter(c => c.feedStatus === 'poor').length;
-        const ratio = poorFeedCount / this.cattle.length;
-
-        if (ratio > 0.5) return 'Poor';
-        if (ratio > 0.2) return 'Fair';
-        return 'Good';
+        return this.averageHealth > 80 ? 'Good' : this.averageHealth > 60 ? 'Fair' : 'Poor';
     }
 
     loadState(state) {
