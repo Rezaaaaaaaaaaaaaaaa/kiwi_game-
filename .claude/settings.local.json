@@ -13,7 +13,9 @@
       "Bash(md \"src\\assets\\audio\\music\")",
       "WebFetch(domain:mixkit.co)",
       "WebFetch(domain:pixabay.com)",
-      "WebFetch(domain:freesound.org)"
+      "WebFetch(domain:freesound.org)",
+      "Bash(git push:*)",
+      "Bash(cmd /c \"git push origin master\")"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
