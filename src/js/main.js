@@ -1,6 +1,17 @@
+// Import enhanced graphics systems
+import('./game/ui/PerformanceMonitor.js').then(module => {
+    window.PerformanceMonitor = module.PerformanceMonitor;
+}).catch(console.error);
+
+import('./game/ui/BackgroundGraphics.js').then(module => {
+    window.BackgroundGraphics = module.BackgroundGraphics;
+}).catch(console.error);
+
 // Simple, working dairy farm game
 class SimpleDairyGame {
     constructor() {
+        this.performanceMonitor = null;
+        this.backgroundGraphics = null;
         this.gameState = {
             // Resources
             cash: 50000,
@@ -68,8 +79,24 @@ class SimpleDairyGame {
     init() {
         console.log('Initializing Simple Dairy Game...');
         this.setupUI();
+        this.initializeGraphics();
         this.showMainMenu();
         console.log('Game initialized successfully!');
+    }
+
+    initializeGraphics() {
+        // Initialize background graphics
+        if (window.BackgroundGraphics) {
+            this.backgroundGraphics = new window.BackgroundGraphics(document.body);
+        }
+        
+        // Initialize performance monitor
+        if (window.PerformanceMonitor) {
+            const monitorContainer = document.createElement('div');
+            monitorContainer.id = 'monitor-container';
+            document.body.appendChild(monitorContainer);
+            this.performanceMonitor = new window.PerformanceMonitor(this, monitorContainer);
+        }
     }
 
     setupUI() {
@@ -173,6 +200,11 @@ class SimpleDairyGame {
         this.showScreen('game-screen');
         this.updateUI();
         this.startGameLoop();
+        
+        // Update background graphics for game time
+        if (this.backgroundGraphics) {
+            this.backgroundGraphics.setTimeOfDay(0.5); // Daytime
+        }
     }
 
     startGameLoop() {
@@ -424,6 +456,17 @@ class SimpleDairyGame {
             this.gameLoop = null;
         }
         this.gameState.isPlaying = false;
+        
+        // Clean up graphics systems
+        if (this.performanceMonitor) {
+            this.performanceMonitor.destroy();
+            this.performanceMonitor = null;
+        }
+        
+        if (this.backgroundGraphics) {
+            this.backgroundGraphics.destroy();
+            this.backgroundGraphics = null;
+        }
     }
 }
 

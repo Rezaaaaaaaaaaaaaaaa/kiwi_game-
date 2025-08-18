@@ -65,6 +65,17 @@ export class Game {
         this.scenarioManager = new ScenarioManager(this);
         this.scenarioManager.init();
 
+        // Initialize enhanced graphics systems
+        const { PerformanceMonitor } = await import('./ui/PerformanceMonitor.js');
+        const { BackgroundGraphics } = await import('./ui/BackgroundGraphics.js');
+        
+        this.backgroundGraphics = new BackgroundGraphics(document.body);
+        
+        const monitorContainer = document.createElement('div');
+        monitorContainer.id = 'monitor-container';
+        document.body.appendChild(monitorContainer);
+        this.performanceMonitor = new PerformanceMonitor(this, monitorContainer);
+
         // Start menu music
         this.audioManager.playMusic('menu-theme');
     }
@@ -96,6 +107,11 @@ export class Game {
             // Switch to game music
             if (this.audioManager) {
                 this.audioManager.playMusic('peaceful-farm');
+            }
+
+            // Update background graphics for game time
+            if (this.backgroundGraphics) {
+                this.backgroundGraphics.setTimeOfDay(0.5); // Daytime start
             }
 
             // Update UI
@@ -185,6 +201,12 @@ export class Game {
             // Update farm renderer
             if (this.farmRenderer) {
                 this.farmRenderer.update(deltaTime);
+            }
+
+            // Update background graphics with time of day
+            if (this.backgroundGraphics && this.gameTime) {
+                const timeOfDay = (this.gameTime.hour / 24.0);
+                this.backgroundGraphics.setTimeOfDay(timeOfDay);
             }
 
             // Update UI
@@ -584,6 +606,17 @@ export class Game {
         // Stop all systems
         for (const system of this.systems.values()) {
             system.stop();
+        }
+
+        // Clean up graphics systems
+        if (this.performanceMonitor) {
+            this.performanceMonitor.destroy();
+            this.performanceMonitor = null;
+        }
+        
+        if (this.backgroundGraphics) {
+            this.backgroundGraphics.destroy();
+            this.backgroundGraphics = null;
         }
     }
 

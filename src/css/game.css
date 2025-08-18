@@ -690,6 +690,145 @@
     }
 }
 
+/* Performance Monitor Styles */
+.performance-monitor {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 320px;
+    max-width: 90vw;
+}
+
+.monitor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.monitor-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.monitor-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.monitor-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.monitor-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.monitor-content {
+    padding: 20px;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.chart-container {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.chart-container h4 {
+    margin: 0 0 12px 0;
+    font-size: 0.9rem;
+    color: var(--primary-green);
+    font-weight: 600;
+    text-align: center;
+}
+
+.chart-container canvas {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    background: rgba(248, 249, 250, 0.5);
+}
+
+.chart-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: var(--dark-gray);
+    font-weight: 500;
+}
+
+.chart-stats span {
+    padding: 2px 6px;
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+/* Responsive Performance Monitor */
+@media (max-width: 768px) {
+    .performance-monitor {
+        position: fixed;
+        top: auto;
+        bottom: 20px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    .monitor-content {
+        padding: 12px;
+    }
+    
+    .chart-container {
+        padding: 12px;
+    }
+    
+    .chart-container h4 {
+        font-size: 0.8rem;
+        margin-bottom: 8px;
+    }
+    
+    .chart-stats {
+        flex-direction: column;
+        gap: 4px;
+        align-items: center;
+    }
+}
+
 @media (max-width: 480px) {
     #top-bar {
         padding: 8px 12px;
@@ -724,5 +863,16 @@
     
     .scenario-title {
         font-size: 1.1rem;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .performance-monitor {
+        bottom: 10px;
+        right: 5px;
+        left: 5px;
     }
 }
