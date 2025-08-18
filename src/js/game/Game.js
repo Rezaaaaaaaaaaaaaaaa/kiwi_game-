@@ -68,6 +68,7 @@ export class Game {
         // Initialize enhanced graphics systems
         const { PerformanceMonitor } = await import('./ui/PerformanceMonitor.js');
         const { BackgroundGraphics } = await import('./ui/BackgroundGraphics.js');
+        const { PlotManager } = await import('./ui/PlotManager.js');
         
         this.backgroundGraphics = new BackgroundGraphics(document.body);
         
@@ -75,6 +76,10 @@ export class Game {
         monitorContainer.id = 'monitor-container';
         document.body.appendChild(monitorContainer);
         this.performanceMonitor = new PerformanceMonitor(this, monitorContainer);
+        
+        // Initialize plot manager
+        this.plotManager = new PlotManager(this);
+        this.plotManager.init();
 
         // Start menu music
         this.audioManager.playMusic('menu-theme');
@@ -203,6 +208,11 @@ export class Game {
                 this.farmRenderer.update(deltaTime);
             }
 
+            // Update plot manager
+            if (this.plotManager) {
+                this.plotManager.update(deltaTime);
+            }
+
             // Update background graphics with time of day
             if (this.backgroundGraphics && this.gameTime) {
                 const timeOfDay = (this.gameTime.hour / 24.0);
@@ -291,6 +301,13 @@ export class Game {
                 break;
             case 'multiplayer':
                 this.showMultiplayer();
+                break;
+            case 'show-plots':
+            case 'toggle-plots':
+                this.plotManager?.togglePlotsVisibility();
+                break;
+            case 'export-analytics':
+                this.exportAnalytics();
                 break;
             default:
                 console.warn(`Unknown action: ${actionType}`);
@@ -640,6 +657,25 @@ export class Game {
         return state;
     }
 
+    exportAnalytics() {
+        const statisticsSystem = this.systems.get('statistics');
+        if (statisticsSystem) {
+            const data = statisticsSystem.exportData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `kiwi_farm_analytics_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.uiManager?.showNotification('Analytics exported!', 'success');
+        }
+    }
+
     getSaveData() {
         return {
             version: '1.0.0',
@@ -648,7 +684,8 @@ export class Game {
             farm: this.farm,
             resources: this.resources,
             gameTime: this.gameTime,
-            systems: this.getSystemsState()
+            systems: this.getSystemsState(),
+            plotManager: this.plotManager?.getState()
         };
     }
 
@@ -666,6 +703,11 @@ export class Game {
                 if (saveData.systems[name]) {
                     system.loadState(saveData.systems[name]);
                 }
+            }
+
+            // Load plot manager state
+            if (saveData.plotManager && this.plotManager) {
+                this.plotManager.loadState(saveData.plotManager);
             }
 
             // Start systems

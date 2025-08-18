@@ -270,12 +270,15 @@ export class StatisticsSystem extends BaseSystem {
             cash: dailyStat.cash
         });
 
-        // Efficiency analytics
+        // Efficiency analytics (includes cattle and operations)
         this.analytics.efficiency.push({
             day: dailyStat.day,
             overall: dailyStat.farmEfficiency,
             cattle: dailyStat.averageCattleHealth,
-            pasture: dailyStat.pastureQuality
+            pasture: dailyStat.pastureQuality,
+            cattleCount: dailyStat.cattleCount,
+            feedConsumption: dailyStat.feedConsumption,
+            weatherScore: this.calculateWeatherScore(dailyStat)
         });
 
         // Environmental analytics
@@ -530,6 +533,31 @@ export class StatisticsSystem extends BaseSystem {
         if (infrastructure?.storage) value += infrastructure.storage * 2; // $2 per litre capacity
         
         return value;
+    }
+
+    calculateWeatherScore(dailyStat) {
+        // Calculate a composite weather impact score
+        let score = 50; // Base neutral score
+        
+        // Temperature impact
+        const temp = dailyStat.temperature || 15;
+        if (temp >= 10 && temp <= 20) score += 20; // Optimal range
+        else if (temp >= 5 && temp <= 25) score += 10; // Good range
+        else if (temp < 0 || temp > 30) score -= 20; // Extreme temperatures
+        
+        // Rainfall impact
+        const rainfall = dailyStat.rainfall || 0;
+        if (rainfall >= 2 && rainfall <= 5) score += 15; // Good rainfall
+        else if (rainfall > 5 && rainfall <= 10) score += 5; // Heavy but manageable
+        else if (rainfall > 15) score -= 15; // Too wet
+        else if (rainfall < 1) score -= 10; // Too dry
+        
+        // Weather events impact
+        if (dailyStat.weatherEvents && dailyStat.weatherEvents.length > 0) {
+            score -= dailyStat.weatherEvents.length * 10; // Each event reduces score
+        }
+        
+        return Math.max(0, Math.min(100, score));
     }
 
     getAnalytics(category, days = 30) {

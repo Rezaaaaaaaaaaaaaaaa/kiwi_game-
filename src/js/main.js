@@ -1,481 +1,229 @@
-// Import enhanced graphics systems
-import('./game/ui/PerformanceMonitor.js').then(module => {
-    window.PerformanceMonitor = module.PerformanceMonitor;
-}).catch(console.error);
+// Enhanced Dairy Farm Game Main Entry Point
+import { Game } from './game/Game.js';
+import { UIManager } from './game/ui/UIManager.js';
+import { DataManager } from './game/data/DataManager.js';
 
-import('./game/ui/BackgroundGraphics.js').then(module => {
-    window.BackgroundGraphics = module.BackgroundGraphics;
-}).catch(console.error);
-
-// Simple, working dairy farm game
-class SimpleDairyGame {
+// Main game application
+class KiwiDairyGame {
     constructor() {
-        this.performanceMonitor = null;
-        this.backgroundGraphics = null;
-        this.gameState = {
-            // Resources
-            cash: 50000,
-            milk: 0,
-            feed: 1000,
-            energy: 100,
-            
-            // Farm
-            farmName: "My Farm",
-            region: "Canterbury",
-            farmSize: 100,
-            
-            // Cattle
-            cattle: [],
-            
-            // Time
-            day: 1,
-            season: "spring",
-            year: 2024,
-            hour: 6,
-            
-            // Game state
-            isPlaying: false,
-            isPaused: false
-        };
-        
-        this.scenarios = this.loadScenarios();
-        this.currentScenario = null;
-        this.gameLoop = null;
-        this.lastUpdate = 0;
+        this.dataManager = null;
+        this.uiManager = null;
+        this.game = null;
+        this.isInitialized = false;
     }
 
-    loadScenarios() {
-        return {
-            canterbury: {
-                id: 'canterbury',
-                name: 'Canterbury Plains',
-                description: 'Flat, fertile land with irrigation. Perfect for beginners.',
-                difficulty: 'Easy',
-                startingCash: 75000,
-                startingCattle: 150,
-                startingFeed: 2000
-            },
-            waikato: {
-                id: 'waikato',
-                name: 'Waikato Heartland',
-                description: 'Traditional dairy country with reliable rainfall.',
-                difficulty: 'Medium',
-                startingCash: 60000,
-                startingCattle: 200,
-                startingFeed: 1500
-            },
-            southland: {
-                id: 'southland',
-                name: 'Southland Challenge',
-                description: 'Large scale farming with harsh winters.',
-                difficulty: 'Hard',
-                startingCash: 80000,
-                startingCattle: 300,
-                startingFeed: 3000
-            }
-        };
-    }
+    async init() {
+        try {
+            console.log('Initializing Kiwi Dairy Farm Game...');
 
-    init() {
-        console.log('Initializing Simple Dairy Game...');
-        this.setupUI();
-        this.initializeGraphics();
-        this.showMainMenu();
-        console.log('Game initialized successfully!');
-    }
+            // Initialize data manager
+            this.dataManager = new DataManager();
+            await this.dataManager.init();
 
-    initializeGraphics() {
-        // Initialize background graphics
-        if (window.BackgroundGraphics) {
-            this.backgroundGraphics = new window.BackgroundGraphics(document.body);
-        }
-        
-        // Initialize performance monitor
-        if (window.PerformanceMonitor) {
-            const monitorContainer = document.createElement('div');
-            monitorContainer.id = 'monitor-container';
-            document.body.appendChild(monitorContainer);
-            this.performanceMonitor = new window.PerformanceMonitor(this, monitorContainer);
+            // Initialize UI manager
+            this.uiManager = new UIManager();
+            this.uiManager.init();
+
+            // Initialize main game
+            this.game = new Game(this.dataManager, this.uiManager);
+            await this.game.init();
+
+            // Setup event handlers
+            this.setupEventHandlers();
+
+            this.isInitialized = true;
+            console.log('Game initialized successfully!');
+
+            // Make game globally available
+            window.kiwiDairyGame = this;
+
+        } catch (error) {
+            console.error('Failed to initialize game:', error);
+            this.showError('Failed to initialize game. Please refresh and try again.');
         }
     }
 
-    setupUI() {
-        // Setup menu buttons
-        const newGameBtn = document.getElementById('new-game-btn');
-        const loadGameBtn = document.getElementById('load-game-btn');
-        const scenariosBtn = document.getElementById('scenarios-btn');
-        
-        if (newGameBtn) {
-            newGameBtn.addEventListener('click', () => this.showScenarioSelect());
-        }
-        if (loadGameBtn) {
-            loadGameBtn.addEventListener('click', () => this.loadGame());
-        }
-        if (scenariosBtn) {
-            scenariosBtn.addEventListener('click', () => this.showScenarioSelect());
-        }
-
-        // Setup game buttons
-        document.querySelectorAll('.action-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+    setupEventHandlers() {
+        // Setup action button handlers
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.action-btn[data-action]')) {
                 const action = e.target.dataset.action;
                 this.handleAction(action);
-            });
+            }
         });
 
-        // Setup back button
+        // Setup menu navigation
+        const newGameBtn = document.getElementById('new-game-btn');
+        const scenariosBtn = document.getElementById('scenarios-btn');
         const backBtn = document.getElementById('back-to-menu');
+
+        if (newGameBtn) {
+            newGameBtn.addEventListener('click', () => this.uiManager.showScreen('scenario-select'));
+        }
+        
+        if (scenariosBtn) {
+            scenariosBtn.addEventListener('click', () => this.uiManager.showScreen('scenario-select'));
+        }
+        
         if (backBtn) {
-            backBtn.addEventListener('click', () => this.showMainMenu());
-        }
-    }
-
-    showMainMenu() {
-        this.showScreen('menu-screen');
-    }
-
-    showScenarioSelect() {
-        this.showScreen('scenario-select-screen');
-        this.populateScenarios();
-    }
-
-    populateScenarios() {
-        const scenarioList = document.getElementById('scenario-list');
-        if (!scenarioList) return;
-
-        scenarioList.innerHTML = '';
-        
-        Object.values(this.scenarios).forEach(scenario => {
-            const card = document.createElement('div');
-            card.className = 'scenario-card';
-            card.innerHTML = `
-                <h3>${scenario.name}</h3>
-                <p>${scenario.description}</p>
-                <div class="difficulty">${scenario.difficulty}</div>
-                <button onclick="game.startScenario('${scenario.id}')">Start Game</button>
-            `;
-            scenarioList.appendChild(card);
-        });
-    }
-
-    startScenario(scenarioId) {
-        console.log(`Starting scenario: ${scenarioId}`);
-        
-        const scenario = this.scenarios[scenarioId];
-        if (!scenario) {
-            console.error('Scenario not found:', scenarioId);
-            return;
+            backBtn.addEventListener('click', () => this.uiManager.showScreen('menu'));
         }
 
-        this.currentScenario = scenario;
-        
-        // Initialize game state
-        this.gameState.cash = scenario.startingCash;
-        this.gameState.feed = scenario.startingFeed;
-        this.gameState.cattle = this.createInitialCattle(scenario.startingCattle);
-        this.gameState.region = scenario.name;
-        
-        // Start the game
-        this.startGame();
-    }
-
-    createInitialCattle(count) {
-        const cattle = [];
-        for (let i = 0; i < count; i++) {
-            cattle.push({
-                id: i + 1,
-                breed: 'Holstein-Friesian',
-                age: 3 + Math.random() * 4,
-                health: 85 + Math.random() * 15,
-                lactating: Math.random() < 0.8,
-                milkYield: 20 + Math.random() * 10
-            });
-        }
-        return cattle;
-    }
-
-    startGame() {
-        console.log('Starting game...');
-        this.gameState.isPlaying = true;
-        this.showScreen('game-screen');
-        this.updateUI();
-        this.startGameLoop();
-        
-        // Update background graphics for game time
-        if (this.backgroundGraphics) {
-            this.backgroundGraphics.setTimeOfDay(0.5); // Daytime
-        }
-    }
-
-    startGameLoop() {
-        this.lastUpdate = Date.now();
-        this.gameLoop = setInterval(() => {
-            if (!this.gameState.isPaused) {
-                this.update();
-            }
-        }, 1000); // Update every second
-    }
-
-    update() {
-        // Advance time
-        this.gameState.hour++;
-        if (this.gameState.hour >= 24) {
-            this.gameState.hour = 0;
-            this.gameState.day++;
-            this.dailyUpdate();
-        }
-
-        // Update UI
-        this.updateUI();
-    }
-
-    dailyUpdate() {
-        // Daily milk production
-        let dailyMilk = 0;
-        this.gameState.cattle.forEach(cow => {
-            if (cow.lactating && cow.health > 50) {
-                dailyMilk += cow.milkYield * (cow.health / 100);
+        // Setup keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (this.game && this.game.isPlaying) {
+                switch (e.key) {
+                    case ' ': // Spacebar to pause
+                        e.preventDefault();
+                        this.game.handleAction('pause');
+                        break;
+                    case 'p': // P to show plots
+                        this.game.handleAction('show-plots');
+                        break;
+                    case 's': // S to show statistics
+                        this.game.handleAction('statistics');
+                        break;
+                }
             }
         });
-        
-        this.gameState.milk += dailyMilk;
-        
-        // Daily feed consumption
-        const feedConsumed = this.gameState.cattle.length * 15; // 15kg per cow
-        this.gameState.feed = Math.max(0, this.gameState.feed - feedConsumed);
-        
-        // Check if cattle are underfed
-        if (this.gameState.feed < feedConsumed) {
-            this.gameState.cattle.forEach(cow => {
-                cow.health = Math.max(0, cow.health - 5);
-            });
-            this.showNotification('Cattle are underfed! Health declining.', 'warning');
-        }
 
-        console.log(`Day ${this.gameState.day}: Produced ${dailyMilk.toFixed(1)}L milk`);
+        // Setup window resize handler
+        window.addEventListener('resize', () => {
+            if (this.game && this.game.handleResize) {
+                this.game.handleResize();
+            }
+        });
     }
 
     handleAction(action) {
-        console.log('Action:', action);
-        
-        switch (action) {
-            case 'feed-cattle':
-                this.feedCattle();
-                break;
-            case 'milk-cows':
-                this.milkCows();
-                break;
-            case 'buy-cattle':
-                this.buyCattle();
-                break;
-            case 'sell-milk':
-                this.sellMilk();
-                break;
-            case 'manage-pasture':
-                this.showNotification('Pasture management coming soon!', 'info');
-                break;
-            case 'upgrade-farm':
-                this.showNotification('Farm upgrades coming soon!', 'info');
-                break;
-            default:
-                console.log('Unknown action:', action);
+        if (!this.game) {
+            console.warn('Game not initialized');
+            return;
         }
-        
-        this.updateUI();
+
+        this.game.handleAction(action);
     }
 
-    feedCattle() {
-        const feedNeeded = this.gameState.cattle.length * 20; // 20kg per cow for extra feeding
-        const feedCost = feedNeeded * 0.25; // $0.25 per kg
-        
-        if (this.gameState.cash >= feedCost) {
-            this.gameState.cash -= feedCost;
-            this.gameState.cattle.forEach(cow => {
-                cow.health = Math.min(100, cow.health + 5);
-            });
-            this.showNotification(`Fed ${this.gameState.cattle.length} cattle for $${feedCost}`, 'success');
-        } else {
-            this.showNotification('Not enough cash to buy feed!', 'error');
+    async startNewGame(scenarioId) {
+        if (!this.game) {
+            console.error('Game not initialized');
+            return;
+        }
+
+        try {
+            await this.game.startNewGame(scenarioId);
+            this.uiManager.showScreen('game');
+        } catch (error) {
+            console.error('Failed to start new game:', error);
+            this.showError('Failed to start new game. Please try again.');
         }
     }
 
-    milkCows() {
-        let totalMilk = 0;
-        const lactatingCows = this.gameState.cattle.filter(cow => cow.lactating && cow.health > 50);
+    saveGame() {
+        if (!this.game) return;
         
-        lactatingCows.forEach(cow => {
-            const milk = cow.milkYield * (cow.health / 100) * 0.5; // Half daily yield per milking
-            totalMilk += milk;
-        });
-        
-        this.gameState.milk += totalMilk;
-        this.showNotification(`Milked ${lactatingCows.length} cows: +${totalMilk.toFixed(1)}L`, 'success');
-    }
-
-    buyCattle() {
-        const cowCost = 1500;
-        if (this.gameState.cash >= cowCost) {
-            this.gameState.cash -= cowCost;
-            const newCow = {
-                id: this.gameState.cattle.length + 1,
-                breed: 'Holstein-Friesian',
-                age: 2 + Math.random() * 2,
-                health: 90 + Math.random() * 10,
-                lactating: Math.random() < 0.7,
-                milkYield: 20 + Math.random() * 10
-            };
-            this.gameState.cattle.push(newCow);
-            this.showNotification(`Bought 1 cow for $${cowCost}`, 'success');
-        } else {
-            this.showNotification('Not enough cash to buy cattle!', 'error');
+        try {
+            const saveData = this.game.getSaveData();
+            localStorage.setItem('kiwiDairyGame_save', JSON.stringify(saveData));
+            this.uiManager.showNotification('Game saved!', 'success');
+        } catch (error) {
+            console.error('Failed to save game:', error);
+            this.uiManager.showNotification('Failed to save game!', 'error');
         }
     }
 
-    sellMilk() {
-        if (this.gameState.milk > 0) {
-            const pricePerLitre = 0.65;
-            const revenue = this.gameState.milk * pricePerLitre;
-            this.gameState.cash += revenue;
-            this.showNotification(`Sold ${this.gameState.milk.toFixed(1)}L milk for $${revenue.toFixed(2)}`, 'success');
-            this.gameState.milk = 0;
-        } else {
-            this.showNotification('No milk to sell!', 'error');
-        }
-    }
+    async loadGame() {
+        if (!this.game) return;
 
-    updateUI() {
-        // Update resources
-        const resourcesDisplay = document.getElementById('resources-display');
-        if (resourcesDisplay) {
-            resourcesDisplay.innerHTML = `
-                <div class="resource-item">💰 $${this.gameState.cash.toLocaleString()}</div>
-                <div class="resource-item">🥛 ${this.gameState.milk.toFixed(1)}L</div>
-                <div class="resource-item">🌾 ${this.gameState.feed.toFixed(0)}kg</div>
-                <div class="resource-item">⚡ ${this.gameState.energy}%</div>
-            `;
-        }
-
-        // Update date/time
-        const dateWeather = document.getElementById('date-weather');
-        if (dateWeather) {
-            dateWeather.innerHTML = `
-                <div>Day ${this.gameState.day}, ${this.gameState.season} ${this.gameState.year}</div>
-                <div>${this.gameState.hour}:00 - ☀️ Sunny</div>
-            `;
-        }
-
-        // Update farm stats
-        const farmStats = document.getElementById('farm-stats');
-        if (farmStats) {
-            farmStats.innerHTML = `
-                <div>Farm: ${this.gameState.farmName}</div>
-                <div>Region: ${this.gameState.region}</div>
-                <div>Size: ${this.gameState.farmSize} ha</div>
-            `;
-        }
-
-        // Update cattle stats
-        const cattleStats = document.getElementById('cattle-stats');
-        if (cattleStats) {
-            const lactatingCows = this.gameState.cattle.filter(c => c.lactating).length;
-            const avgHealth = this.gameState.cattle.length > 0 
-                ? this.gameState.cattle.reduce((sum, c) => sum + c.health, 0) / this.gameState.cattle.length
-                : 100;
-            
-            cattleStats.innerHTML = `
-                <div>Total Cows: ${this.gameState.cattle.length}</div>
-                <div>Lactating: ${lactatingCows}</div>
-                <div>Avg Health: ${avgHealth.toFixed(1)}%</div>
-            `;
-        }
-
-        // Update production stats
-        const productionStats = document.getElementById('production-stats');
-        if (productionStats) {
-            const dailyProduction = this.gameState.cattle
-                .filter(c => c.lactating)
-                .reduce((sum, c) => sum + c.milkYield * (c.health / 100), 0);
-            
-            productionStats.innerHTML = `
-                <div>Daily Milk: ${dailyProduction.toFixed(1)}L</div>
-                <div>Milk Price: $0.65/L</div>
-                <div>Daily Value: $${(dailyProduction * 0.65).toFixed(2)}</div>
-            `;
-        }
-    }
-
-    showScreen(screenId) {
-        // Hide all screens
-        document.querySelectorAll('.screen').forEach(screen => {
-            screen.classList.remove('active');
-        });
-        
-        // Show target screen
-        const targetScreen = document.getElementById(screenId);
-        if (targetScreen) {
-            targetScreen.classList.add('active');
-        }
-    }
-
-    showNotification(message, type = 'info') {
-        console.log(`[${type.toUpperCase()}] ${message}`);
-        
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.textContent = message;
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            border-radius: 4px;
-            color: white;
-            font-weight: bold;
-            z-index: 1000;
-            background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : '#2196F3'};
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Auto remove after 3 seconds
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
+        try {
+            const saveData = localStorage.getItem('kiwiDairyGame_save');
+            if (!saveData) {
+                this.uiManager.showNotification('No save game found!', 'warning');
+                return;
             }
-        }, 3000);
+
+            const data = JSON.parse(saveData);
+            await this.game.loadGame(data);
+            this.uiManager.showScreen('game');
+            this.uiManager.showNotification('Game loaded!', 'success');
+        } catch (error) {
+            console.error('Failed to load game:', error);
+            this.uiManager.showNotification('Failed to load game!', 'error');
+        }
     }
 
-    loadGame() {
-        this.showNotification('Load game feature coming soon!', 'info');
+    showError(message) {
+        // Show error message to user
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #f44336;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        `;
+        errorDiv.innerHTML = `
+            <h3>Error</h3>
+            <p>${message}</p>
+            <button onclick="this.parentNode.remove()" style="background: white; color: #f44336; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-top: 10px;">OK</button>
+        `;
+        document.body.appendChild(errorDiv);
     }
 
-    stop() {
-        if (this.gameLoop) {
-            clearInterval(this.gameLoop);
-            this.gameLoop = null;
+    // Debug methods
+    getDebugInfo() {
+        return {
+            isInitialized: this.isInitialized,
+            gameState: this.game?.debugInfo(),
+            version: '1.0.0'
+        };
+    }
+
+    // Cheat methods for development
+    cheat_addCash(amount = 10000) {
+        if (this.game?.resources) {
+            this.game.resources.cash += amount;
+            this.uiManager?.showNotification(`Added $${amount}`, 'info');
         }
-        this.gameState.isPlaying = false;
-        
-        // Clean up graphics systems
-        if (this.performanceMonitor) {
-            this.performanceMonitor.destroy();
-            this.performanceMonitor = null;
+    }
+
+    cheat_addMilk(amount = 1000) {
+        if (this.game?.resources) {
+            this.game.resources.milk += amount;
+            this.uiManager?.showNotification(`Added ${amount}L milk`, 'info');
         }
-        
-        if (this.backgroundGraphics) {
-            this.backgroundGraphics.destroy();
-            this.backgroundGraphics = null;
+    }
+
+    cheat_skipTime(hours = 24) {
+        const timeSystem = this.game?.systems?.get('time');
+        if (timeSystem) {
+            timeSystem.advanceTime(hours);
+            this.uiManager?.showNotification(`Skipped ${hours} hours`, 'info');
         }
     }
 }
 
 // Initialize game when page loads
 let game;
-document.addEventListener('DOMContentLoaded', () => {
-    game = new SimpleDairyGame();
-    game.init();
+document.addEventListener('DOMContentLoaded', async () => {
+    game = new KiwiDairyGame();
+    await game.init();
     
     // Make game available globally for debugging
     window.game = game;
+    
+    // Setup global functions for HTML onclick handlers
+    window.startScenario = (scenarioId) => game.startNewGame(scenarioId);
+    window.saveGame = () => game.saveGame();
+    window.loadGame = () => game.loadGame();
+    
+    console.log('Kiwi Dairy Farm Game is ready! 🐄🥛');
+    console.log('Debug: Use window.game to access game instance');
+    console.log('Cheats: game.cheat_addCash(), game.cheat_addMilk(), game.cheat_skipTime()');
 });
